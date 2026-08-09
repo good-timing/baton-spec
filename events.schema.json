@@ -1,0 +1,775 @@
+{
+  "$defs": {
+    "AnnotationEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "sequence_number": {
+          "minimum": 0,
+          "title": "Sequence Number",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_token": {
+          "title": "Consent Token",
+          "type": "string"
+        },
+        "sdk_version": {
+          "default": "0.5.0",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "agent_runtime": {
+          "default": "unknown",
+          "title": "Agent Runtime",
+          "type": "string"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "User Id"
+        },
+        "runtime_meta": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Meta"
+        },
+        "event_type": {
+          "const": "annotation",
+          "default": "annotation",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/AnnotationPayload"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "vendor_id",
+        "session_id",
+        "sequence_number",
+        "captured_at",
+        "consent_token",
+        "payload"
+      ],
+      "title": "AnnotationEvent",
+      "type": "object"
+    },
+    "AnnotationPayload": {
+      "additionalProperties": false,
+      "description": "Agent-supplied context. All fields nullable per SPEC \u00a75.1.1 \u2014 agent\npopulates what it has. Proactive annotations typically populate\n``intent``/``expected_outcome``/``workflow``; reactive annotations\ntypically populate ``signal_type``/``suggested_improvement``.",
+      "properties": {
+        "intent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Intent"
+        },
+        "expected_outcome": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Outcome"
+        },
+        "signal_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Signal Type"
+        },
+        "workflow": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workflow"
+        },
+        "suggested_improvement": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Suggested Improvement"
+        },
+        "context": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context"
+        },
+        "intent_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Intent Source"
+        },
+        "tool_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tool Name"
+        }
+      },
+      "title": "AnnotationPayload",
+      "type": "object"
+    },
+    "SurfaceSnapshotEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "sequence_number": {
+          "minimum": 0,
+          "title": "Sequence Number",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_token": {
+          "title": "Consent Token",
+          "type": "string"
+        },
+        "sdk_version": {
+          "default": "0.5.0",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "agent_runtime": {
+          "default": "unknown",
+          "title": "Agent Runtime",
+          "type": "string"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "User Id"
+        },
+        "runtime_meta": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Meta"
+        },
+        "event_type": {
+          "const": "surface_snapshot",
+          "default": "surface_snapshot",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/SurfaceSnapshotPayload"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "vendor_id",
+        "session_id",
+        "sequence_number",
+        "captured_at",
+        "consent_token",
+        "payload"
+      ],
+      "title": "SurfaceSnapshotEvent",
+      "type": "object"
+    },
+    "SurfaceSnapshotPayload": {
+      "additionalProperties": false,
+      "description": "The vendor-true upstream surface (pre-injection) \u2014 mirrors baton-proxy's\n``enqueue_surface_snapshot`` payload's top-level fields (see\n``baton_proxy.emitter.Emitter.enqueue_surface_snapshot``) so the Console\nworker materializes both into the same ``vendor_surfaces`` table. Emitted\nat most once per observed ``surface_hash`` per process.\n\n``tools`` excludes Baton's own injected tool(s) (e.g. the annotation\ntool) \u2014 those are recorded in ``seam_augmentations.injected_tools``\ninstead, matching proxy's split. ``surface_hash`` is the identity change\nspecs are authored against (proxy's ``base_surface_hash``); it must NOT\ninclude anything Baton adds, or toggling e.g. ``intent_param_mode`` would\ninvalidate every recipe pinned to the vendor's real surface.\n\n``seam_augmentations.intent_param`` is NOT byte-for-byte with proxy: the\nSDK injects two params (``user_goal`` + ``expected_result``), so it emits\nplural ``names: list[str]``, where proxy (one injected param) emits\nsingular ``name: str``. Console-side consumers MUST handle both shapes \u2014\nsee ``baton_console.dashboard.queries.build_surface_view``.",
+      "properties": {
+        "surface_hash": {
+          "title": "Surface Hash",
+          "type": "string"
+        },
+        "server_info": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Server Info"
+        },
+        "capabilities": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Capabilities"
+        },
+        "instructions": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Instructions"
+        },
+        "tools": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Tools",
+          "type": "array"
+        },
+        "seam_augmentations": {
+          "additionalProperties": true,
+          "title": "Seam Augmentations",
+          "type": "object"
+        }
+      },
+      "required": [
+        "surface_hash"
+      ],
+      "title": "SurfaceSnapshotPayload",
+      "type": "object"
+    },
+    "ToolCallEndEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "sequence_number": {
+          "minimum": 0,
+          "title": "Sequence Number",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_token": {
+          "title": "Consent Token",
+          "type": "string"
+        },
+        "sdk_version": {
+          "default": "0.5.0",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "agent_runtime": {
+          "default": "unknown",
+          "title": "Agent Runtime",
+          "type": "string"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "User Id"
+        },
+        "runtime_meta": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Meta"
+        },
+        "event_type": {
+          "const": "tool_call_end",
+          "default": "tool_call_end",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ToolCallEndPayload"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "vendor_id",
+        "session_id",
+        "sequence_number",
+        "captured_at",
+        "consent_token",
+        "payload"
+      ],
+      "title": "ToolCallEndEvent",
+      "type": "object"
+    },
+    "ToolCallEndPayload": {
+      "additionalProperties": false,
+      "description": "Emitted after the vendor handler returns. ``result`` is PII-scrubbed.",
+      "properties": {
+        "tool_name": {
+          "title": "Tool Name",
+          "type": "string"
+        },
+        "result": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Result"
+        },
+        "duration_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Ms"
+        }
+      },
+      "required": [
+        "tool_name"
+      ],
+      "title": "ToolCallEndPayload",
+      "type": "object"
+    },
+    "ToolCallErrorEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "sequence_number": {
+          "minimum": 0,
+          "title": "Sequence Number",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_token": {
+          "title": "Consent Token",
+          "type": "string"
+        },
+        "sdk_version": {
+          "default": "0.5.0",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "agent_runtime": {
+          "default": "unknown",
+          "title": "Agent Runtime",
+          "type": "string"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "User Id"
+        },
+        "runtime_meta": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Meta"
+        },
+        "event_type": {
+          "const": "tool_call_error",
+          "default": "tool_call_error",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ToolCallErrorPayload"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "vendor_id",
+        "session_id",
+        "sequence_number",
+        "captured_at",
+        "consent_token",
+        "payload"
+      ],
+      "title": "ToolCallErrorEvent",
+      "type": "object"
+    },
+    "ToolCallErrorPayload": {
+      "additionalProperties": false,
+      "description": "Emitted when the vendor handler raises. ``error_type`` is the exception\nclass name; ``error_body`` is the exception message (PII-scrubbed).",
+      "properties": {
+        "tool_name": {
+          "title": "Tool Name",
+          "type": "string"
+        },
+        "error_type": {
+          "title": "Error Type",
+          "type": "string"
+        },
+        "error_body": {
+          "title": "Error Body",
+          "type": "string"
+        },
+        "duration_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Ms"
+        }
+      },
+      "required": [
+        "tool_name",
+        "error_type",
+        "error_body"
+      ],
+      "title": "ToolCallErrorPayload",
+      "type": "object"
+    },
+    "ToolCallStartEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "sequence_number": {
+          "minimum": 0,
+          "title": "Sequence Number",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_token": {
+          "title": "Consent Token",
+          "type": "string"
+        },
+        "sdk_version": {
+          "default": "0.5.0",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "agent_runtime": {
+          "default": "unknown",
+          "title": "Agent Runtime",
+          "type": "string"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "User Id"
+        },
+        "runtime_meta": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Meta"
+        },
+        "event_type": {
+          "const": "tool_call_start",
+          "default": "tool_call_start",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ToolCallStartPayload"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "vendor_id",
+        "session_id",
+        "sequence_number",
+        "captured_at",
+        "consent_token",
+        "payload"
+      ],
+      "title": "ToolCallStartEvent",
+      "type": "object"
+    },
+    "ToolCallStartPayload": {
+      "additionalProperties": false,
+      "description": "Emitted before the vendor handler runs. ``params`` is PII-scrubbed at\nemit-time per SPEC \u00a77.\n\n``call_intent`` is the per-tool intent the SDK stripped from the injected\n``user_goal`` param (see ``integrations._llm_text.USER_GOAL_PARAM_NAME``);\nit rides as a SIBLING of ``params`` \u2014 ``params`` stays exactly the\nvendor-visible arguments. ``intent_source`` records provenance\n(``\"injected_param\"``). Both null when the param wasn't used. The Console\nreads ``payload.call_intent`` (``worker/correlate.py``, ``cycle.py``);\nkept in lockstep with the proxy's emitter output.",
+      "properties": {
+        "tool_name": {
+          "title": "Tool Name",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": true,
+          "title": "Params",
+          "type": "object"
+        },
+        "call_intent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Intent"
+        },
+        "intent_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Intent Source"
+        }
+      },
+      "required": [
+        "tool_name"
+      ],
+      "title": "ToolCallStartPayload",
+      "type": "object"
+    }
+  },
+  "discriminator": {
+    "mapping": {
+      "annotation": "#/$defs/AnnotationEvent",
+      "surface_snapshot": "#/$defs/SurfaceSnapshotEvent",
+      "tool_call_end": "#/$defs/ToolCallEndEvent",
+      "tool_call_error": "#/$defs/ToolCallErrorEvent",
+      "tool_call_start": "#/$defs/ToolCallStartEvent"
+    },
+    "propertyName": "event_type"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/ToolCallStartEvent"
+    },
+    {
+      "$ref": "#/$defs/ToolCallEndEvent"
+    },
+    {
+      "$ref": "#/$defs/ToolCallErrorEvent"
+    },
+    {
+      "$ref": "#/$defs/AnnotationEvent"
+    },
+    {
+      "$ref": "#/$defs/SurfaceSnapshotEvent"
+    }
+  ]
+}

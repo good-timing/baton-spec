@@ -1,0 +1,20 @@
+{
+  "event_id": "019fe441-3b8f-7131-94e2-18283c42e3ae",
+  "tenant_id": "spec-vectors",
+  "vendor_id": "spec-vectors",
+  "session_id": "sdk-019fe441-3b8d-75ef-868e-104ed0605ea7",
+  "sequence_number": 6,
+  "captured_at": "2026-08-09T02:01:48.174998Z",
+  "consent_token": "ct_spec_vectors",
+  "sdk_version": "0.5.0",
+  "agent_runtime": "unknown",
+  "user_id": null,
+  "runtime_meta": null,
+  "event_type": "tool_call_error",
+  "payload": {
+    "tool_name": "boom",
+    "error_type": "ValueError",
+    "error_body": "simulated failure",
+    "duration_ms": 0
+  }
+}

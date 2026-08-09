@@ -1,0 +1,24 @@
+{
+  "event_id": "019fe441-3b8e-70e8-93c2-0900c8c53614",
+  "tenant_id": "spec-vectors",
+  "vendor_id": "spec-vectors",
+  "session_id": "sdk-019fe441-3b8d-75ef-868e-104ed0605ea7",
+  "sequence_number": 1,
+  "captured_at": "2026-08-09T02:01:48.174438Z",
+  "consent_token": "ct_spec_vectors",
+  "sdk_version": "0.5.0",
+  "agent_runtime": "unknown",
+  "user_id": null,
+  "runtime_meta": null,
+  "event_type": "annotation",
+  "payload": {
+    "intent": "look something up",
+    "expected_outcome": "a match",
+    "signal_type": null,
+    "workflow": null,
+    "suggested_improvement": null,
+    "context": null,
+    "intent_source": null,
+    "tool_name": null
+  }
+}

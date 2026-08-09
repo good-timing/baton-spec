@@ -1,0 +1,79 @@
+{
+  "event_id": "019fe441-3b8e-70e8-93c2-0901b523594e",
+  "tenant_id": "spec-vectors",
+  "vendor_id": "spec-vectors",
+  "session_id": "sdk-019fe441-3b8d-75ef-868e-104ed0605ea7",
+  "sequence_number": 2,
+  "captured_at": "2026-08-09T02:01:48.174827Z",
+  "consent_token": "ct_spec_vectors",
+  "sdk_version": "0.5.0",
+  "agent_runtime": "unknown",
+  "user_id": null,
+  "runtime_meta": null,
+  "event_type": "surface_snapshot",
+  "payload": {
+    "surface_hash": "sha256:200119366150cf2068e74c8be5fadba60db56bf969771b667c598848b6b6b67d",
+    "server_info": {
+      "name": "spec-vector-generator",
+      "version": "1.27.2"
+    },
+    "capabilities": {
+      "experimental": {},
+      "logging": null,
+      "prompts": {
+        "listChanged": false
+      },
+      "resources": {
+        "subscribe": false,
+        "listChanged": false
+      },
+      "tools": {
+        "listChanged": false
+      },
+      "completions": null,
+      "tasks": null
+    },
+    "instructions": null,
+    "tools": [
+      {
+        "name": "boom",
+        "description": "",
+        "inputSchema": {
+          "properties": {},
+          "title": "boomArguments",
+          "type": "object"
+        }
+      },
+      {
+        "name": "lookup",
+        "description": "",
+        "inputSchema": {
+          "properties": {
+            "name": {
+              "title": "Name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "title": "lookupArguments",
+          "type": "object"
+        }
+      }
+    ],
+    "seam_augmentations": {
+      "injected_tools": [
+        "spec-vectors_annotate"
+      ],
+      "intent_param": {
+        "names": [
+          "expected_result",
+          "user_goal"
+        ],
+        "mode": "optional"
+      },
+      "instructions_suffix": true
+    }
+  }
+}

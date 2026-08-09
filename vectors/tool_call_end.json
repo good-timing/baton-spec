@@ -1,0 +1,26 @@
+{
+  "event_id": "019fe441-3b8e-70e8-93c2-0903c560e36d",
+  "tenant_id": "spec-vectors",
+  "vendor_id": "spec-vectors",
+  "session_id": "sdk-019fe441-3b8d-75ef-868e-104ed0605ea7",
+  "sequence_number": 4,
+  "captured_at": "2026-08-09T02:01:48.174931Z",
+  "consent_token": "ct_spec_vectors",
+  "sdk_version": "0.5.0",
+  "agent_runtime": "unknown",
+  "user_id": null,
+  "runtime_meta": null,
+  "event_type": "tool_call_end",
+  "payload": {
+    "tool_name": "lookup",
+    "result": [
+      {
+        "type": "text",
+        "text": "{\n  \"found\": true,\n  \"name\": \"alice\"\n}",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "duration_ms": 0
+  }
+}
