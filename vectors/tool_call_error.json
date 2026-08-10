@@ -1,10 +1,10 @@
 {
-  "event_id": "019fe441-3b8f-7131-94e2-18283c42e3ae",
+  "event_id": "019fedb9-89f5-724a-8e26-e31fbf86f6f2",
   "tenant_id": "spec-vectors",
   "vendor_id": "spec-vectors",
-  "session_id": "sdk-019fe441-3b8d-75ef-868e-104ed0605ea7",
+  "session_id": "sdk-019fedb9-89f3-7750-aed5-7eda984d0f5e",
   "sequence_number": 6,
-  "captured_at": "2026-08-09T02:01:48.174998Z",
+  "captured_at": "2026-08-10T22:09:47.509774Z",
   "consent_token": "ct_spec_vectors",
   "sdk_version": "0.5.0",
   "agent_runtime": "unknown",

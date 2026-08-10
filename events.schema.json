@@ -702,7 +702,7 @@
     },
     "ToolCallStartPayload": {
       "additionalProperties": false,
-      "description": "Emitted before the vendor handler runs. ``params`` is PII-scrubbed at\nemit-time per SPEC \u00a77.\n\n``call_intent`` is the per-tool intent the SDK stripped from the injected\n``user_goal`` param (see ``integrations._llm_text.USER_GOAL_PARAM_NAME``);\nit rides as a SIBLING of ``params`` \u2014 ``params`` stays exactly the\nvendor-visible arguments. ``intent_source`` records provenance\n(``\"injected_param\"``). Both null when the param wasn't used. The Console\nreads ``payload.call_intent`` (``worker/correlate.py``, ``cycle.py``);\nkept in lockstep with the proxy's emitter output.",
+      "description": "Emitted before the vendor handler runs. ``params`` is PII-scrubbed at\nemit-time per SPEC \u00a77.\n\n``call_intent`` / ``call_expected`` / ``call_workflow`` are the values the\nSDK stripped from the injected ``user_goal`` / ``expected_result`` /\n``overall_task`` params (``integrations._llm_text``); they ride as\nSIBLINGS of ``params`` \u2014 ``params`` stays exactly the vendor-visible\narguments. ``call_intent``/``call_expected`` are call-scoped diagnostics;\n``call_workflow`` is the task-label grouping key (console rung 3b, exact\nstring continuity). ``intent_source`` records provenance\n(``\"injected_param\"``). All null when the params weren't used. The Console\nreads these off ``payload`` (``worker/correlate.py``, ``cycle.py``); kept\nin lockstep with the proxy's emitter output.",
       "properties": {
         "tool_name": {
           "title": "Tool Name",
@@ -724,6 +724,30 @@
           ],
           "default": null,
           "title": "Call Intent"
+        },
+        "call_expected": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Expected"
+        },
+        "call_workflow": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Workflow"
         },
         "intent_source": {
           "anyOf": [
