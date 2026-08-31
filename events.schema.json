@@ -35,7 +35,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.5.0",
+          "default": "0.6.0",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -231,7 +231,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.5.0",
+          "default": "0.6.0",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -289,7 +289,7 @@
     },
     "SurfaceSnapshotPayload": {
       "additionalProperties": false,
-      "description": "The vendor-true upstream surface (pre-injection) \u2014 mirrors baton-proxy's\n``enqueue_surface_snapshot`` payload's top-level fields (see\n``baton_proxy.emitter.Emitter.enqueue_surface_snapshot``) so the Console\nworker materializes both into the same ``vendor_surfaces`` table. Emitted\nat most once per observed ``surface_hash`` per process.\n\n``tools`` excludes Baton's own injected tool(s) (e.g. the annotation\ntool) \u2014 those are recorded in ``seam_augmentations.injected_tools``\ninstead, matching proxy's split. ``surface_hash`` is the identity change\nspecs are authored against (proxy's ``base_surface_hash``); it must NOT\ninclude anything Baton adds, or toggling e.g. ``intent_param_mode`` would\ninvalidate every recipe pinned to the vendor's real surface.\n\n``seam_augmentations.intent_param`` is NOT byte-for-byte with proxy: the\nSDK injects two params (``user_goal`` + ``expected_result``), so it emits\nplural ``names: list[str]``, where proxy (one injected param) emits\nsingular ``name: str``. Console-side consumers MUST handle both shapes \u2014\nsee ``baton_console.dashboard.queries.build_surface_view``.",
+      "description": "The vendor-true upstream surface (pre-injection) \u2014 mirrors baton-proxy's\n``enqueue_surface_snapshot`` payload's top-level fields (see\n``baton_proxy.emitter.Emitter.enqueue_surface_snapshot``) so the Console\nworker materializes both into the same ``vendor_surfaces`` table. Emitted\nat most once per observed ``surface_hash`` per process.\n\n``tools`` excludes Baton's own injected tool(s) (e.g. the annotation\ntool) \u2014 those are recorded in ``seam_augmentations.injected_tools``\ninstead, matching proxy's split. ``surface_hash`` is the identity change\nspecs are authored against (proxy's ``base_surface_hash``); it must NOT\ninclude anything Baton adds, or toggling e.g. ``intent_param_mode`` would\ninvalidate every recipe pinned to the vendor's real surface.\n\n``seam_augmentations.intent_param`` carries plural ``names: list[str]``,\nnow the same three names in both producers (``user_goal``,\n``expected_result``, ``overall_task``) since baton-proxy gained the third.\nOlder events still carry the shapes this field has had before \u2014 two names,\nor proxy's original singular ``name: str`` \u2014 so console-side consumers MUST\nkeep handling all of them; see\n``baton_console.dashboard.queries.build_surface_view``. The list is DATA,\nnot shape: it must never feed ``surface_hash``, or adding a param would\ninvalidate every recipe pinned to the vendor's real surface.",
       "properties": {
         "surface_hash": {
           "title": "Surface Hash",
@@ -388,7 +388,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.5.0",
+          "default": "0.6.0",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -516,7 +516,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.5.0",
+          "default": "0.6.0",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -644,7 +644,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.5.0",
+          "default": "0.6.0",
           "title": "Sdk Version",
           "type": "string"
         },
