@@ -56,15 +56,6 @@
           "default": null,
           "title": "User Id"
         },
-        "correlation_mode": {
-          "default": "session-stitched",
-          "enum": [
-            "session-stitched",
-            "per-event"
-          ],
-          "title": "Correlation Mode",
-          "type": "string"
-        },
         "runtime_meta": {
           "anyOf": [
             {
@@ -261,15 +252,6 @@
           "default": null,
           "title": "User Id"
         },
-        "correlation_mode": {
-          "default": "session-stitched",
-          "enum": [
-            "session-stitched",
-            "per-event"
-          ],
-          "title": "Correlation Mode",
-          "type": "string"
-        },
         "runtime_meta": {
           "anyOf": [
             {
@@ -427,15 +409,6 @@
           "default": null,
           "title": "User Id"
         },
-        "correlation_mode": {
-          "default": "session-stitched",
-          "enum": [
-            "session-stitched",
-            "per-event"
-          ],
-          "title": "Correlation Mode",
-          "type": "string"
-        },
         "runtime_meta": {
           "anyOf": [
             {
@@ -564,15 +537,6 @@
           "default": null,
           "title": "User Id"
         },
-        "correlation_mode": {
-          "default": "session-stitched",
-          "enum": [
-            "session-stitched",
-            "per-event"
-          ],
-          "title": "Correlation Mode",
-          "type": "string"
-        },
         "runtime_meta": {
           "anyOf": [
             {
@@ -700,15 +664,6 @@
           ],
           "default": null,
           "title": "User Id"
-        },
-        "correlation_mode": {
-          "default": "session-stitched",
-          "enum": [
-            "session-stitched",
-            "per-event"
-          ],
-          "title": "Correlation Mode",
-          "type": "string"
         },
         "runtime_meta": {
           "anyOf": [
