@@ -1,0 +1,4 @@
+# Python bytecode. A .pyc of scripts/generate.py was committed by
+# 783ccdd and is removed here; this file is what stops the next one.
+__pycache__/
+*.py[cod]
