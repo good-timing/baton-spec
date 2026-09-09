@@ -37,8 +37,8 @@ def write_schema() -> None:
 
 
 async def _capture_events(events_path: str) -> None:
-    from baton.integrations.mcp import VendorConfig, install_baton
-    from baton.integrations.mcp._compat import MCPServerClass as FastMCP
+    from baton.integrations.official import VendorConfig, install_baton
+    from baton.integrations.official._compat import MCPServerClass as FastMCP
     from baton.sinks import FileSink
 
     mcp = FastMCP("spec-vector-generator")
