@@ -58,12 +58,27 @@ async def _capture_events(events_path: str) -> None:
             vendor_display_name="Spec Vector Generator",
             consent_token="ct_spec_vectors",
             sink=FileSink(events_path),
+            # Explicit because the DEFAULT moved out from under this script:
+            # ``proactive_mode`` now defaults to "off", under which the
+            # annotation tool refuses a signal_type-less call and returns
+            # ok:False instead of emitting. That is a real product default, but
+            # here it silently dropped the ``annotation`` vector — the scenario
+            # must exercise every event type, so the mode is pinned rather than
+            # inherited.
+            proactive_mode="on",
         ),
     )
     try:
+        # The TOOL's parameter names are not the payload's field names, and
+        # this call sent the payload's until it started failing: the annotation
+        # tool takes ``user_goal`` / ``expected_result`` (agent-facing wording)
+        # and writes them into the envelope as ``intent`` / ``expected_outcome``.
+        # ``user_goal`` is REQUIRED, so the old spelling raised rather than
+        # producing a wrong vector — which is why only the schema half of this
+        # script had been running.
         await mcp.call_tool(
             "spec-vectors_annotate",
-            {"intent": "look something up", "expected_outcome": "a match"},
+            {"user_goal": "look something up", "expected_result": "a match"},
         )
         await mcp.call_tool("lookup", {"name": "alice"})
         try:

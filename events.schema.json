@@ -35,7 +35,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.6.0",
+          "default": "0.7.2",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -55,6 +55,18 @@
           ],
           "default": null,
           "title": "User Id"
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
         },
         "runtime_meta": {
           "anyOf": [
@@ -231,7 +243,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.6.0",
+          "default": "0.7.2",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -251,6 +263,18 @@
           ],
           "default": null,
           "title": "User Id"
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
         },
         "runtime_meta": {
           "anyOf": [
@@ -388,7 +412,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.6.0",
+          "default": "0.7.2",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -408,6 +432,18 @@
           ],
           "default": null,
           "title": "User Id"
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
         },
         "runtime_meta": {
           "anyOf": [
@@ -516,7 +552,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.6.0",
+          "default": "0.7.2",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -536,6 +572,18 @@
           ],
           "default": null,
           "title": "User Id"
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
         },
         "runtime_meta": {
           "anyOf": [
@@ -644,7 +692,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.6.0",
+          "default": "0.7.2",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -664,6 +712,18 @@
           ],
           "default": null,
           "title": "User Id"
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
         },
         "runtime_meta": {
           "anyOf": [
