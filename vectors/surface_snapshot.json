@@ -1,10 +1,10 @@
 {
-  "event_id": "01a0a237-1d02-77cf-8e3f-58907ef3e15c",
+  "event_id": "01a0a23f-e5b3-7145-a2ae-b55844a0ca47",
   "tenant_id": "spec-vectors",
   "vendor_id": "spec-vectors",
-  "session_id": "sdk-01a0a237-1d00-77a4-9554-bef702f1ca4b",
+  "session_id": "sdk-01a0a23f-e5b2-71b9-af90-8afc66aea0a4",
   "sequence_number": 2,
-  "captured_at": "2026-09-14T23:18:36.034120Z",
+  "captured_at": "2026-09-14T23:28:11.699744Z",
   "consent_token": "ct_spec_vectors",
   "sdk_version": "0.8.6",
   "agent_runtime": "unknown",
@@ -13,7 +13,7 @@
   "runtime_meta": null,
   "event_type": "surface_snapshot",
   "payload": {
-    "surface_hash": "sha256:d3967f1c637c944e21216df71a246d00b2a92b829bb855ea62fe369a04026158",
+    "surface_hash": "sha256:dd8a4c4a440e73418ed603819ccc8145a02239eb7311e7d0f5c1bea585a2eb9d",
     "server_info": {
       "name": "spec-vector-generator",
       "version": ""
@@ -22,14 +22,14 @@
       "experimental": {},
       "logging": null,
       "prompts": {
-        "list_changed": false
+        "listChanged": false
       },
       "resources": {
         "subscribe": false,
-        "list_changed": false
+        "listChanged": false
       },
       "tools": {
-        "list_changed": false
+        "listChanged": false
       },
       "completions": null,
       "extensions": {},
