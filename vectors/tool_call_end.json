@@ -1,15 +1,15 @@
 {
-  "event_id": "01a0a23f-e5b7-7511-878b-20032bb8f980",
+  "event_id": "00000000-0000-7000-8000-000000000006",
   "tenant_id": "spec-vectors",
   "vendor_id": "spec-vectors",
-  "session_id": "sdk-01a0a23f-e5b2-71b9-af90-8afc66aea0a4",
+  "session_id": "sdk-00000000-0000-7000-8000-000000000002",
   "sequence_number": 4,
-  "captured_at": "2026-09-14T23:28:11.703017Z",
+  "captured_at": "2026-01-01T00:00:00Z",
   "consent_token": "ct_spec_vectors",
   "sdk_version": "0.8.6",
   "agent_runtime": "unknown",
   "principal_id": null,
-  "call_id": "01a0a23f-e5b3-7146-8be3-29c73d56930e",
+  "call_id": "00000000-0000-7000-8000-000000000005",
   "runtime_meta": null,
   "event_type": "tool_call_end",
   "payload": {
@@ -22,6 +22,6 @@
         "meta": null
       }
     ],
-    "duration_ms": 3
+    "duration_ms": 0
   }
 }

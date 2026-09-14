@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -76,12 +77,8 @@ async def _capture_events(events_path: str) -> None:
         # ``user_goal`` is REQUIRED, so the old spelling raised rather than
         # producing a wrong vector — which is why only the schema half of this
         # script had been running.
-        #
-        # The NAME comes from the handle, not a literal. It was hardcoded as
-        # ``{vendor_id}_annotate`` and went stale when the SDK began deriving
-        # the tool name from the server's own name: the script then failed on
-        # "Unknown tool" after writing the schema, so the schema and the
-        # vectors silently disagreed until the next person ran it.
+        # The tool's name comes from the handle: the SDK derives it from the
+        # server's name, so a literal goes stale.
         await mcp.call_tool(
             handle.annotation_tool_name,
             {"user_goal": "look something up", "expected_result": "a match"},
@@ -95,6 +92,31 @@ async def _capture_events(events_path: str) -> None:
         await handle.aclose()
 
 
+_UUID = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
+
+
+def _pin_volatile(events: list[dict[str, Any]]) -> None:
+    """Replace what changes on every run, so a regeneration diffs only where the
+    SDK's output did.
+
+    Clock-based ids become fixed UUIDs, mapped consistently so a call's start
+    and end still share one ``call_id``; timestamps and durations become
+    constants. ``surface_hash`` is untouched — it must match the real surface.
+    """
+    pinned: dict[str, str] = {}
+
+    def pin(match: re.Match[str]) -> str:
+        return pinned.setdefault(match.group(0), f"00000000-0000-7000-8000-{len(pinned) + 1:012d}")
+
+    for event in events:
+        for field in ("event_id", "session_id", "call_id"):
+            if isinstance(event.get(field), str):
+                event[field] = _UUID.sub(pin, event[field])
+        event["captured_at"] = "2026-01-01T00:00:00Z"
+        if isinstance(event.get("payload"), dict) and "duration_ms" in event["payload"]:
+            event["payload"]["duration_ms"] = 0
+
+
 def write_vectors() -> None:
     import tempfile
 
@@ -103,6 +125,7 @@ def write_vectors() -> None:
         asyncio.run(_capture_events(events_path))
         with open(events_path) as f:
             events = [json.loads(line) for line in f if line.strip()]
+    _pin_volatile(events)
 
     vectors_dir = ROOT / "vectors"
     vectors_dir.mkdir(exist_ok=True)
