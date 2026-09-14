@@ -76,8 +76,14 @@ async def _capture_events(events_path: str) -> None:
         # ``user_goal`` is REQUIRED, so the old spelling raised rather than
         # producing a wrong vector — which is why only the schema half of this
         # script had been running.
+        #
+        # The NAME comes from the handle, not a literal. It was hardcoded as
+        # ``{vendor_id}_annotate`` and went stale when the SDK began deriving
+        # the tool name from the server's own name: the script then failed on
+        # "Unknown tool" after writing the schema, so the schema and the
+        # vectors silently disagreed until the next person ran it.
         await mcp.call_tool(
-            "spec-vectors_annotate",
+            handle.annotation_tool_name,
             {"user_goal": "look something up", "expected_result": "a match"},
         )
         await mcp.call_tool("lookup", {"name": "alice"})

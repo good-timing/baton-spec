@@ -35,7 +35,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.7.2",
+          "default": "0.8.6",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -44,7 +44,7 @@
           "title": "Agent Runtime",
           "type": "string"
         },
-        "user_id": {
+        "principal_id": {
           "anyOf": [
             {
               "type": "string"
@@ -54,7 +54,7 @@
             }
           ],
           "default": null,
-          "title": "User Id"
+          "title": "Principal Id"
         },
         "call_id": {
           "anyOf": [
@@ -243,7 +243,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.7.2",
+          "default": "0.8.6",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -252,7 +252,7 @@
           "title": "Agent Runtime",
           "type": "string"
         },
-        "user_id": {
+        "principal_id": {
           "anyOf": [
             {
               "type": "string"
@@ -262,7 +262,7 @@
             }
           ],
           "default": null,
-          "title": "User Id"
+          "title": "Principal Id"
         },
         "call_id": {
           "anyOf": [
@@ -412,7 +412,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.7.2",
+          "default": "0.8.6",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -421,7 +421,7 @@
           "title": "Agent Runtime",
           "type": "string"
         },
-        "user_id": {
+        "principal_id": {
           "anyOf": [
             {
               "type": "string"
@@ -431,7 +431,7 @@
             }
           ],
           "default": null,
-          "title": "User Id"
+          "title": "Principal Id"
         },
         "call_id": {
           "anyOf": [
@@ -552,7 +552,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.7.2",
+          "default": "0.8.6",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -561,7 +561,7 @@
           "title": "Agent Runtime",
           "type": "string"
         },
-        "user_id": {
+        "principal_id": {
           "anyOf": [
             {
               "type": "string"
@@ -571,7 +571,7 @@
             }
           ],
           "default": null,
-          "title": "User Id"
+          "title": "Principal Id"
         },
         "call_id": {
           "anyOf": [
@@ -692,7 +692,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.7.2",
+          "default": "0.8.6",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -701,7 +701,7 @@
           "title": "Agent Runtime",
           "type": "string"
         },
-        "user_id": {
+        "principal_id": {
           "anyOf": [
             {
               "type": "string"
@@ -711,7 +711,7 @@
             }
           ],
           "default": null,
-          "title": "User Id"
+          "title": "Principal Id"
         },
         "call_id": {
           "anyOf": [
