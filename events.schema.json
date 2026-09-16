@@ -35,7 +35,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.6",
+          "default": "0.8.8",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -67,6 +67,18 @@
           ],
           "default": null,
           "title": "Call Id"
+        },
+        "transport_observed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Observed"
         },
         "runtime_meta": {
           "anyOf": [
@@ -243,7 +255,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.6",
+          "default": "0.8.8",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -275,6 +287,18 @@
           ],
           "default": null,
           "title": "Call Id"
+        },
+        "transport_observed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Observed"
         },
         "runtime_meta": {
           "anyOf": [
@@ -412,7 +436,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.6",
+          "default": "0.8.8",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -444,6 +468,18 @@
           ],
           "default": null,
           "title": "Call Id"
+        },
+        "transport_observed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Observed"
         },
         "runtime_meta": {
           "anyOf": [
@@ -552,7 +588,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.6",
+          "default": "0.8.8",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -584,6 +620,18 @@
           ],
           "default": null,
           "title": "Call Id"
+        },
+        "transport_observed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Observed"
         },
         "runtime_meta": {
           "anyOf": [
@@ -692,7 +740,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.6",
+          "default": "0.8.8",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -724,6 +772,18 @@
           ],
           "default": null,
           "title": "Call Id"
+        },
+        "transport_observed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Observed"
         },
         "runtime_meta": {
           "anyOf": [
