@@ -6,10 +6,11 @@
   "sequence_number": 4,
   "captured_at": "2026-01-01T00:00:00Z",
   "consent_token": "ct_spec_vectors",
-  "sdk_version": "0.8.6",
+  "sdk_version": "0.8.8",
   "agent_runtime": "unknown",
   "principal_id": null,
   "call_id": "00000000-0000-7000-8000-000000000005",
+  "transport_observed": null,
   "runtime_meta": null,
   "event_type": "tool_call_end",
   "payload": {
