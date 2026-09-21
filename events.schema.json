@@ -35,7 +35,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.8",
+          "default": "0.8.9",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -44,17 +44,16 @@
           "title": "Agent Runtime",
           "type": "string"
         },
-        "principal_id": {
+        "principal": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/PrincipalWire"
             },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Principal Id"
+          "default": null
         },
         "call_id": {
           "anyOf": [
@@ -220,6 +219,31 @@
       "title": "AnnotationPayload",
       "type": "object"
     },
+    "PrincipalWire": {
+      "additionalProperties": false,
+      "description": "The principal AS EMITTED \u2014 the finished envelope value (SPEC \u00a711.4).\n\n\u26a0 **Not ``baton.Principal``, and the two are easy to confuse.** That one is\nwhat a vendor's ``resolve_principal`` hook HANDS US: a raw subject, an\noptional issuer, optional PII that never leaves the payload tier. This one\nis what we PUT ON THE WIRE after resolving and deriving it \u2014 the raw value\nis gone by the time this is built, and nothing here is ever the input to a\nhash. One is the question, this is the answer.\n\n**All three members are REQUIRED, and that is the guarantee the object\nexists to give.** A producer emits the whole thing or omits ``principal``\nentirely; a partial object is malformed, not a degraded reading. So there\nis no conformant event carrying an ``id`` whose ``form`` a consumer has to\nguess, and none carrying a ``source`` for an identity nobody resolved. That\nbinding is structural here precisely because its predecessor \u2014 a scheme\nprefix plus a paragraph of prose \u2014 was not.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "form": {
+          "title": "Form",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "source",
+        "form"
+      ],
+      "title": "PrincipalWire",
+      "type": "object"
+    },
     "SurfaceSnapshotEvent": {
       "additionalProperties": false,
       "properties": {
@@ -255,7 +279,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.8",
+          "default": "0.8.9",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -264,17 +288,16 @@
           "title": "Agent Runtime",
           "type": "string"
         },
-        "principal_id": {
+        "principal": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/PrincipalWire"
             },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Principal Id"
+          "default": null
         },
         "call_id": {
           "anyOf": [
@@ -436,7 +459,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.8",
+          "default": "0.8.9",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -445,17 +468,16 @@
           "title": "Agent Runtime",
           "type": "string"
         },
-        "principal_id": {
+        "principal": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/PrincipalWire"
             },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Principal Id"
+          "default": null
         },
         "call_id": {
           "anyOf": [
@@ -588,7 +610,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.8",
+          "default": "0.8.9",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -597,17 +619,16 @@
           "title": "Agent Runtime",
           "type": "string"
         },
-        "principal_id": {
+        "principal": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/PrincipalWire"
             },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Principal Id"
+          "default": null
         },
         "call_id": {
           "anyOf": [
@@ -740,7 +761,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.8",
+          "default": "0.8.9",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -749,17 +770,16 @@
           "title": "Agent Runtime",
           "type": "string"
         },
-        "principal_id": {
+        "principal": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/PrincipalWire"
             },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Principal Id"
+          "default": null
         },
         "call_id": {
           "anyOf": [
