@@ -14,7 +14,7 @@
   "runtime_meta": null,
   "event_type": "surface_snapshot",
   "payload": {
-    "surface_hash": "sha256:dd8a4c4a440e73418ed603819ccc8145a02239eb7311e7d0f5c1bea585a2eb9d",
+    "surface_hash": "sha256:281c4f1bcef54a45ab241c9e45647d61b56f3f5c1a54a8f462880fb0addd5b87",
     "server_info": {
       "name": "spec-vector-generator",
       "version": ""
@@ -61,6 +61,15 @@
             "name"
           ],
           "title": "lookupArguments",
+          "type": "object"
+        }
+      },
+      {
+        "name": "soft_fail",
+        "description": "",
+        "inputSchema": {
+          "properties": {},
+          "title": "soft_failArguments",
           "type": "object"
         }
       }

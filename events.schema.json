@@ -691,7 +691,7 @@
     },
     "ToolCallErrorPayload": {
       "additionalProperties": false,
-      "description": "Emitted when the vendor handler raises. ``error_type`` is the exception\nclass name; ``error_body`` is the exception message (PII-scrubbed).",
+      "description": "Emitted when the call FAILED, which MCP expresses two ways (SPEC \u00a711.4.3).\n\n**RAISE** \u2014 the vendor handler raised. ``error_type`` is the exception class\nname, ``error_body`` its message (PII-scrubbed), and ``result`` is None:\nthere is no result object to record.\n\n**RETURN** \u2014 the handler returned normally and the result carried MCP's\nerror flag, which rides a 200 response rather than a JSON-RPC error.\n``error_type`` is ``\"tool_error\"``, ``error_body`` is the reason unwrapped\nfrom the result's ``content`` text parts, and ``result`` carries the full\nenvelope, PII-scrubbed and NOT unwrapped the way ``tool_call_end.result``\nunwraps to the developer's return \u2014 the envelope is what holds the flag and\nthe reason.\n\n``result`` exists so reclassifying the RETURN shape off ``tool_call_end``\ndoes not move a structured body into a flat truncated string.",
       "properties": {
         "tool_name": {
           "title": "Tool Name",
@@ -716,6 +716,16 @@
           ],
           "default": null,
           "title": "Duration Ms"
+        },
+        "result": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Result"
         }
       },
       "required": [

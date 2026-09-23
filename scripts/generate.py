@@ -52,6 +52,21 @@ async def _capture_events(events_path: str) -> None:
     def boom() -> None:
         raise ValueError("simulated failure")
 
+    # ⚠ The SECOND failure shape (SPEC §11.4.3), and it needs its own tool
+    # because the two produce structurally different ``tool_call_error``
+    # payloads: this one populates ``result``, ``boom`` cannot. A scenario
+    # holding only ``boom`` puts the new field in the schema with no vector
+    # exercising it — present, and never once pinned.
+    @mcp.tool()
+    def soft_fail() -> Any:
+        import mcp.types as mcp_types
+
+        content = [mcp_types.TextContent(type="text", text="simulated returned failure")]
+        try:
+            return mcp_types.CallToolResult(content=content, is_error=True)
+        except Exception:  # mcp 1.x spells it the other way
+            return mcp_types.CallToolResult(content=content, isError=True)
+
     handle = install_baton(
         mcp,
         VendorConfig(
@@ -86,6 +101,10 @@ async def _capture_events(events_path: str) -> None:
         await mcp.call_tool("lookup", {"name": "alice"})
         try:
             await mcp.call_tool("boom", {})
+        except Exception:
+            pass
+        try:
+            await mcp.call_tool("soft_fail", {})
         except Exception:
             pass
     finally:
@@ -133,14 +152,29 @@ def write_vectors() -> None:
     seen_types: set[str] = set()
     for event in events:
         event_type = event["event_type"]
-        if event_type in seen_types:
+        # ``tool_call_error`` has TWO structurally different shapes and needs a
+        # vector each (SPEC §11.4.3): a raise leaves ``result`` null, a
+        # returned error flag populates it. One-vector-per-type would pin
+        # whichever the scenario happened to call first and leave the other
+        # shape — the one this field was added for — unexercised.
+        name = event_type
+        if event_type == "tool_call_error" and (event.get("payload") or {}).get("result") is not None:
+            name = "tool_call_error.returned"
+        if name in seen_types:
             continue
-        seen_types.add(event_type)
-        out = vectors_dir / f"{event_type}.json"
+        seen_types.add(name)
+        out = vectors_dir / f"{name}.json"
         out.write_text(json.dumps(event, indent=2) + "\n")
-        print(f"wrote vectors/{event_type}.json")
+        print(f"wrote vectors/{name}.json")
 
-    missing = {"tool_call_start", "tool_call_end", "tool_call_error", "annotation", "surface_snapshot"} - seen_types
+    missing = {
+        "tool_call_start",
+        "tool_call_end",
+        "tool_call_error",
+        "tool_call_error.returned",
+        "annotation",
+        "surface_snapshot",
+    } - seen_types
     if missing:
         raise SystemExit(f"scenario did not produce every event type, missing: {missing}")
 

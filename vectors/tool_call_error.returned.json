@@ -1,0 +1,36 @@
+{
+  "event_id": "00000000-0000-7000-8000-000000000012",
+  "tenant_id": "spec-vectors",
+  "vendor_id": "spec-vectors",
+  "session_id": "sdk-00000000-0000-7000-8000-000000000002",
+  "sequence_number": 8,
+  "captured_at": "2026-01-01T00:00:00Z",
+  "consent_token": "ct_spec_vectors",
+  "sdk_version": "0.8.9",
+  "agent_runtime": "unknown",
+  "principal": null,
+  "call_id": "00000000-0000-7000-8000-000000000011",
+  "transport_observed": null,
+  "runtime_meta": null,
+  "event_type": "tool_call_error",
+  "payload": {
+    "tool_name": "soft_fail",
+    "error_type": "tool_error",
+    "error_body": "simulated returned failure",
+    "duration_ms": 0,
+    "result": {
+      "meta": null,
+      "content": [
+        {
+          "type": "text",
+          "text": "simulated returned failure",
+          "annotations": null,
+          "meta": null
+        }
+      ],
+      "structured_content": null,
+      "is_error": true,
+      "result_type": "complete"
+    }
+  }
+}
