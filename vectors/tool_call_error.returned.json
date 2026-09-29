@@ -6,7 +6,7 @@
   "sequence_number": 8,
   "captured_at": "2026-01-01T00:00:00Z",
   "consent_token": "ct_spec_vectors",
-  "sdk_version": "0.8.9",
+  "sdk_version": "0.8.11",
   "agent_runtime": "unknown",
   "principal": null,
   "call_id": "00000000-0000-7000-8000-000000000011",
