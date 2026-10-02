@@ -244,6 +244,1690 @@
       "title": "PrincipalWire",
       "type": "object"
     },
+    "PromptGetEndEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "sequence_number": {
+          "minimum": 0,
+          "title": "Sequence Number",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_token": {
+          "title": "Consent Token",
+          "type": "string"
+        },
+        "sdk_version": {
+          "default": "0.8.11",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "agent_runtime": {
+          "default": "unknown",
+          "title": "Agent Runtime",
+          "type": "string"
+        },
+        "principal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        },
+        "transport_observed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Observed"
+        },
+        "runtime_meta": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Meta"
+        },
+        "event_type": {
+          "const": "prompt_get_end",
+          "default": "prompt_get_end",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/PromptGetEndPayload"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "vendor_id",
+        "session_id",
+        "sequence_number",
+        "captured_at",
+        "consent_token",
+        "payload"
+      ],
+      "title": "PromptGetEndEvent",
+      "type": "object"
+    },
+    "PromptGetEndPayload": {
+      "additionalProperties": false,
+      "description": "Emitted after ``prompts/get`` returns.\n\n\u26a0 **No rendered messages**, for the reason ``ResourceReadEndPayload``\ngives. A prompt's rendered text is authored by the SERVER rather than\nfetched by a tool, so whether it is customer content at all is a decision\nnobody has taken \u2014 and the standing answer, from the only producer, is that\nit does not egress.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "duration_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Ms"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "PromptGetEndPayload",
+      "type": "object"
+    },
+    "PromptGetErrorEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "sequence_number": {
+          "minimum": 0,
+          "title": "Sequence Number",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_token": {
+          "title": "Consent Token",
+          "type": "string"
+        },
+        "sdk_version": {
+          "default": "0.8.11",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "agent_runtime": {
+          "default": "unknown",
+          "title": "Agent Runtime",
+          "type": "string"
+        },
+        "principal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        },
+        "transport_observed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Observed"
+        },
+        "runtime_meta": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Meta"
+        },
+        "event_type": {
+          "const": "prompt_get_error",
+          "default": "prompt_get_error",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/PromptGetErrorPayload"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "vendor_id",
+        "session_id",
+        "sequence_number",
+        "captured_at",
+        "consent_token",
+        "payload"
+      ],
+      "title": "PromptGetErrorEvent",
+      "type": "object"
+    },
+    "PromptGetErrorPayload": {
+      "additionalProperties": false,
+      "description": "Emitted when ``prompts/get`` failed. See ``ResourceReadErrorPayload``\nfor how ``error_type`` is spelled and why ``error_body`` is kept.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "error_type": {
+          "title": "Error Type",
+          "type": "string"
+        },
+        "error_body": {
+          "title": "Error Body",
+          "type": "string"
+        },
+        "duration_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Ms"
+        }
+      },
+      "required": [
+        "name",
+        "error_type",
+        "error_body"
+      ],
+      "title": "PromptGetErrorPayload",
+      "type": "object"
+    },
+    "PromptGetStartEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "sequence_number": {
+          "minimum": 0,
+          "title": "Sequence Number",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_token": {
+          "title": "Consent Token",
+          "type": "string"
+        },
+        "sdk_version": {
+          "default": "0.8.11",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "agent_runtime": {
+          "default": "unknown",
+          "title": "Agent Runtime",
+          "type": "string"
+        },
+        "principal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        },
+        "transport_observed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Observed"
+        },
+        "runtime_meta": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Meta"
+        },
+        "event_type": {
+          "const": "prompt_get_start",
+          "default": "prompt_get_start",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/PromptGetStartPayload"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "vendor_id",
+        "session_id",
+        "sequence_number",
+        "captured_at",
+        "consent_token",
+        "payload"
+      ],
+      "title": "PromptGetStartEvent",
+      "type": "object"
+    },
+    "PromptGetStartPayload": {
+      "additionalProperties": false,
+      "description": "Emitted before a ``prompts/get`` reaches the upstream server.\n\n\u26a0 ``params`` is the request's ``arguments`` member alone, NOT the whole\nparams bag \u2014 which is the opposite of ``ResourceReadStartPayload``'s\nchoice, measured in ``proxy.py`` (``params=params.get(\"arguments\")``\nagainst the resource path's dict comprehension). The two are inconsistent\nin the only producer that exists; the inconsistency is recorded here so a\nsecond producer copies the shape rather than guessing at a rule, and so a\nconsumer does not expect ``name`` inside ``params`` the way ``uri`` does\nappear there.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "params": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Params"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "PromptGetStartPayload",
+      "type": "object"
+    },
+    "PromptListEndEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "sequence_number": {
+          "minimum": 0,
+          "title": "Sequence Number",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_token": {
+          "title": "Consent Token",
+          "type": "string"
+        },
+        "sdk_version": {
+          "default": "0.8.11",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "agent_runtime": {
+          "default": "unknown",
+          "title": "Agent Runtime",
+          "type": "string"
+        },
+        "principal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        },
+        "transport_observed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Observed"
+        },
+        "runtime_meta": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Meta"
+        },
+        "event_type": {
+          "const": "prompt_list_end",
+          "default": "prompt_list_end",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/PromptListEndPayload"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "vendor_id",
+        "session_id",
+        "sequence_number",
+        "captured_at",
+        "consent_token",
+        "payload"
+      ],
+      "title": "PromptListEndEvent",
+      "type": "object"
+    },
+    "PromptListEndPayload": {
+      "additionalProperties": false,
+      "description": "Emitted after ``prompts/list`` returns. ``count`` counts the ``prompts``\narray.",
+      "properties": {
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        },
+        "duration_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Ms"
+        }
+      },
+      "required": [
+        "count"
+      ],
+      "title": "PromptListEndPayload",
+      "type": "object"
+    },
+    "PromptListErrorEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "sequence_number": {
+          "minimum": 0,
+          "title": "Sequence Number",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_token": {
+          "title": "Consent Token",
+          "type": "string"
+        },
+        "sdk_version": {
+          "default": "0.8.11",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "agent_runtime": {
+          "default": "unknown",
+          "title": "Agent Runtime",
+          "type": "string"
+        },
+        "principal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        },
+        "transport_observed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Observed"
+        },
+        "runtime_meta": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Meta"
+        },
+        "event_type": {
+          "const": "prompt_list_error",
+          "default": "prompt_list_error",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/PromptListErrorPayload"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "vendor_id",
+        "session_id",
+        "sequence_number",
+        "captured_at",
+        "consent_token",
+        "payload"
+      ],
+      "title": "PromptListErrorEvent",
+      "type": "object"
+    },
+    "PromptListErrorPayload": {
+      "additionalProperties": false,
+      "description": "Emitted when ``prompts/list`` failed. See\n``ResourceReadErrorPayload`` for how ``error_type`` is spelled.",
+      "properties": {
+        "error_type": {
+          "title": "Error Type",
+          "type": "string"
+        },
+        "error_body": {
+          "title": "Error Body",
+          "type": "string"
+        },
+        "duration_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Ms"
+        }
+      },
+      "required": [
+        "error_type",
+        "error_body"
+      ],
+      "title": "PromptListErrorPayload",
+      "type": "object"
+    },
+    "PromptListStartEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "sequence_number": {
+          "minimum": 0,
+          "title": "Sequence Number",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_token": {
+          "title": "Consent Token",
+          "type": "string"
+        },
+        "sdk_version": {
+          "default": "0.8.11",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "agent_runtime": {
+          "default": "unknown",
+          "title": "Agent Runtime",
+          "type": "string"
+        },
+        "principal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        },
+        "transport_observed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Observed"
+        },
+        "runtime_meta": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Meta"
+        },
+        "event_type": {
+          "const": "prompt_list_start",
+          "default": "prompt_list_start",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/PromptListStartPayload"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "vendor_id",
+        "session_id",
+        "sequence_number",
+        "captured_at",
+        "consent_token",
+        "payload"
+      ],
+      "title": "PromptListStartEvent",
+      "type": "object"
+    },
+    "PromptListStartPayload": {
+      "additionalProperties": false,
+      "description": "Emitted before a ``prompts/list`` reaches the upstream server. Empty,\nfor the reason ``ResourceListStartPayload`` carries.",
+      "properties": {},
+      "title": "PromptListStartPayload",
+      "type": "object"
+    },
+    "ResourceListEndEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "sequence_number": {
+          "minimum": 0,
+          "title": "Sequence Number",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_token": {
+          "title": "Consent Token",
+          "type": "string"
+        },
+        "sdk_version": {
+          "default": "0.8.11",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "agent_runtime": {
+          "default": "unknown",
+          "title": "Agent Runtime",
+          "type": "string"
+        },
+        "principal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        },
+        "transport_observed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Observed"
+        },
+        "runtime_meta": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Meta"
+        },
+        "event_type": {
+          "const": "resource_list_end",
+          "default": "resource_list_end",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ResourceListEndPayload"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "vendor_id",
+        "session_id",
+        "sequence_number",
+        "captured_at",
+        "consent_token",
+        "payload"
+      ],
+      "title": "ResourceListEndEvent",
+      "type": "object"
+    },
+    "ResourceListEndPayload": {
+      "additionalProperties": false,
+      "description": "Emitted after ``resources/list`` returns.\n\n\u26a0 ``count`` counts the ``resources`` array ALONE. Resource TEMPLATES are a\nseparate MCP method (``resources/templates/list``) with its own result\narray, and the proxy does not add them in (``proxy.py``'s\n``_emit_call_end``: ``len((result or {}).get(\"resources\", []))``). So a\nserver exposing only templates reports ``count: 0`` here, correctly \u2014 and a\nconsumer must not read this as \"the server has no resources\".",
+      "properties": {
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        },
+        "duration_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Ms"
+        }
+      },
+      "required": [
+        "count"
+      ],
+      "title": "ResourceListEndPayload",
+      "type": "object"
+    },
+    "ResourceListErrorEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "sequence_number": {
+          "minimum": 0,
+          "title": "Sequence Number",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_token": {
+          "title": "Consent Token",
+          "type": "string"
+        },
+        "sdk_version": {
+          "default": "0.8.11",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "agent_runtime": {
+          "default": "unknown",
+          "title": "Agent Runtime",
+          "type": "string"
+        },
+        "principal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        },
+        "transport_observed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Observed"
+        },
+        "runtime_meta": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Meta"
+        },
+        "event_type": {
+          "const": "resource_list_error",
+          "default": "resource_list_error",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ResourceListErrorPayload"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "vendor_id",
+        "session_id",
+        "sequence_number",
+        "captured_at",
+        "consent_token",
+        "payload"
+      ],
+      "title": "ResourceListErrorEvent",
+      "type": "object"
+    },
+    "ResourceListErrorPayload": {
+      "additionalProperties": false,
+      "description": "Emitted when ``resources/list`` failed.\n\n``error_type`` is an UNCONSTRAINED string and the two producers spell it\ndifferently on purpose \u2014 see ``ResourceReadErrorPayload``, which carries\nthe full note for all six error payloads.",
+      "properties": {
+        "error_type": {
+          "title": "Error Type",
+          "type": "string"
+        },
+        "error_body": {
+          "title": "Error Body",
+          "type": "string"
+        },
+        "duration_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Ms"
+        }
+      },
+      "required": [
+        "error_type",
+        "error_body"
+      ],
+      "title": "ResourceListErrorPayload",
+      "type": "object"
+    },
+    "ResourceListStartEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "sequence_number": {
+          "minimum": 0,
+          "title": "Sequence Number",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_token": {
+          "title": "Consent Token",
+          "type": "string"
+        },
+        "sdk_version": {
+          "default": "0.8.11",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "agent_runtime": {
+          "default": "unknown",
+          "title": "Agent Runtime",
+          "type": "string"
+        },
+        "principal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        },
+        "transport_observed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Observed"
+        },
+        "runtime_meta": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Meta"
+        },
+        "event_type": {
+          "const": "resource_list_start",
+          "default": "resource_list_start",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ResourceListStartPayload"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "vendor_id",
+        "session_id",
+        "sequence_number",
+        "captured_at",
+        "consent_token",
+        "payload"
+      ],
+      "title": "ResourceListStartEvent",
+      "type": "object"
+    },
+    "ResourceListStartPayload": {
+      "additionalProperties": false,
+      "description": "Emitted before a ``resources/list`` reaches the upstream server.\n\nDeliberately EMPTY. A list request carries no subject \u2014 the proxy passes\n``payload={}`` \u2014 and the envelope already names the session, the tenant and\nthe vendor. A consumer counting list traffic has everything it needs\nwithout a member here.",
+      "properties": {},
+      "title": "ResourceListStartPayload",
+      "type": "object"
+    },
+    "ResourceReadEndEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "sequence_number": {
+          "minimum": 0,
+          "title": "Sequence Number",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_token": {
+          "title": "Consent Token",
+          "type": "string"
+        },
+        "sdk_version": {
+          "default": "0.8.11",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "agent_runtime": {
+          "default": "unknown",
+          "title": "Agent Runtime",
+          "type": "string"
+        },
+        "principal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        },
+        "transport_observed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Observed"
+        },
+        "runtime_meta": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Meta"
+        },
+        "event_type": {
+          "const": "resource_read_end",
+          "default": "resource_read_end",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ResourceReadEndPayload"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "vendor_id",
+        "session_id",
+        "sequence_number",
+        "captured_at",
+        "consent_token",
+        "payload"
+      ],
+      "title": "ResourceReadEndEvent",
+      "type": "object"
+    },
+    "ResourceReadEndPayload": {
+      "additionalProperties": false,
+      "description": "Emitted after ``resources/read`` returns.\n\n\u26a0 **No content member, and that is the design rather than a gap.** The\nresource BODY is customer data of exactly the kind\n``response_capture_switch.md`` exists to keep off the wire, and the only\nproducer there is has never sent it. Recording the URI and the timing is\nwhat makes a failing or slow read visible without the body.",
+      "properties": {
+        "uri": {
+          "title": "Uri",
+          "type": "string"
+        },
+        "duration_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Ms"
+        }
+      },
+      "required": [
+        "uri"
+      ],
+      "title": "ResourceReadEndPayload",
+      "type": "object"
+    },
+    "ResourceReadErrorEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "sequence_number": {
+          "minimum": 0,
+          "title": "Sequence Number",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_token": {
+          "title": "Consent Token",
+          "type": "string"
+        },
+        "sdk_version": {
+          "default": "0.8.11",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "agent_runtime": {
+          "default": "unknown",
+          "title": "Agent Runtime",
+          "type": "string"
+        },
+        "principal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        },
+        "transport_observed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Observed"
+        },
+        "runtime_meta": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Meta"
+        },
+        "event_type": {
+          "const": "resource_read_error",
+          "default": "resource_read_error",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ResourceReadErrorPayload"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "vendor_id",
+        "session_id",
+        "sequence_number",
+        "captured_at",
+        "consent_token",
+        "payload"
+      ],
+      "title": "ResourceReadErrorEvent",
+      "type": "object"
+    },
+    "ResourceReadErrorPayload": {
+      "additionalProperties": false,
+      "description": "Emitted when ``resources/read`` failed.\n\n\u26a0 **``error_type`` is an unconstrained string and the producers do NOT\nagree on how to spell it** \u2014 stated here, for all six error payloads,\nrather than left for a consumer to discover. ``baton-proxy`` reads the\nWIRE, so what it holds is the upstream's JSON-RPC error and it files the\nnumeric ``code`` as a string (``\"-32002\"``). An in-process SDK sensor holds\na live exception instead and files its class name, the way \u00a711.4.3's RAISE\nshape already does for tools. Both are legal \u2014 the schema constrains\nneither, and \u00a711.4.3 says outright that this member separates SHAPES and is\nnot a closed set of values \u2014 but a consumer MUST NOT read one producer's\nspelling as the vocabulary.\n\n\u26a0 **``error_body`` is KEPT whatever the capture mode.** It is a failed\nFETCH's message, not anything a resource returned, so nothing here is\nresult-derived. \u00a711.4.3's provenance rule put the proxy's own\nupstream-error analogue on the same footing.",
+      "properties": {
+        "uri": {
+          "title": "Uri",
+          "type": "string"
+        },
+        "error_type": {
+          "title": "Error Type",
+          "type": "string"
+        },
+        "error_body": {
+          "title": "Error Body",
+          "type": "string"
+        },
+        "duration_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Ms"
+        }
+      },
+      "required": [
+        "uri",
+        "error_type",
+        "error_body"
+      ],
+      "title": "ResourceReadErrorPayload",
+      "type": "object"
+    },
+    "ResourceReadStartEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "sequence_number": {
+          "minimum": 0,
+          "title": "Sequence Number",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_token": {
+          "title": "Consent Token",
+          "type": "string"
+        },
+        "sdk_version": {
+          "default": "0.8.11",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "agent_runtime": {
+          "default": "unknown",
+          "title": "Agent Runtime",
+          "type": "string"
+        },
+        "principal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        },
+        "transport_observed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Observed"
+        },
+        "runtime_meta": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Meta"
+        },
+        "event_type": {
+          "const": "resource_read_start",
+          "default": "resource_read_start",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ResourceReadStartPayload"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "vendor_id",
+        "session_id",
+        "sequence_number",
+        "captured_at",
+        "consent_token",
+        "payload"
+      ],
+      "title": "ResourceReadStartEvent",
+      "type": "object"
+    },
+    "ResourceReadStartPayload": {
+      "additionalProperties": false,
+      "description": "Emitted before a ``resources/read`` reaches the upstream server.\n\n\u26a0 ``uri`` is ALSO inside ``params``. The proxy builds ``params`` by\nremoving ``_meta`` from the request's params and nothing else\n(``proxy.py``: ``{k: v for k, v in params.items() if k != \"_meta\"}``), and\n``uri`` is one of them \u2014 so the subject appears twice, once in its own\nmember and once in the bag. Recorded rather than deduplicated: the\ndedicated member is what a consumer should read, the bag is what the caller\nactually sent, and a producer that stripped ``uri`` from ``params`` would\nstop being able to say that.",
+      "properties": {
+        "uri": {
+          "title": "Uri",
+          "type": "string"
+        },
+        "params": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Params"
+        }
+      },
+      "required": [
+        "uri"
+      ],
+      "title": "ResourceReadStartPayload",
+      "type": "object"
+    },
     "SurfaceSnapshotEvent": {
       "additionalProperties": false,
       "properties": {
@@ -958,6 +2642,18 @@
   "discriminator": {
     "mapping": {
       "annotation": "#/$defs/AnnotationEvent",
+      "prompt_get_end": "#/$defs/PromptGetEndEvent",
+      "prompt_get_error": "#/$defs/PromptGetErrorEvent",
+      "prompt_get_start": "#/$defs/PromptGetStartEvent",
+      "prompt_list_end": "#/$defs/PromptListEndEvent",
+      "prompt_list_error": "#/$defs/PromptListErrorEvent",
+      "prompt_list_start": "#/$defs/PromptListStartEvent",
+      "resource_list_end": "#/$defs/ResourceListEndEvent",
+      "resource_list_error": "#/$defs/ResourceListErrorEvent",
+      "resource_list_start": "#/$defs/ResourceListStartEvent",
+      "resource_read_end": "#/$defs/ResourceReadEndEvent",
+      "resource_read_error": "#/$defs/ResourceReadErrorEvent",
+      "resource_read_start": "#/$defs/ResourceReadStartEvent",
       "surface_snapshot": "#/$defs/SurfaceSnapshotEvent",
       "tool_call_end": "#/$defs/ToolCallEndEvent",
       "tool_call_error": "#/$defs/ToolCallErrorEvent",
@@ -980,6 +2676,42 @@
     },
     {
       "$ref": "#/$defs/SurfaceSnapshotEvent"
+    },
+    {
+      "$ref": "#/$defs/ResourceListStartEvent"
+    },
+    {
+      "$ref": "#/$defs/ResourceListEndEvent"
+    },
+    {
+      "$ref": "#/$defs/ResourceListErrorEvent"
+    },
+    {
+      "$ref": "#/$defs/ResourceReadStartEvent"
+    },
+    {
+      "$ref": "#/$defs/ResourceReadEndEvent"
+    },
+    {
+      "$ref": "#/$defs/ResourceReadErrorEvent"
+    },
+    {
+      "$ref": "#/$defs/PromptListStartEvent"
+    },
+    {
+      "$ref": "#/$defs/PromptListEndEvent"
+    },
+    {
+      "$ref": "#/$defs/PromptListErrorEvent"
+    },
+    {
+      "$ref": "#/$defs/PromptGetStartEvent"
+    },
+    {
+      "$ref": "#/$defs/PromptGetEndEvent"
+    },
+    {
+      "$ref": "#/$defs/PromptGetErrorEvent"
     }
   ]
 }
