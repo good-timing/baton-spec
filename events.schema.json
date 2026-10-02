@@ -750,6 +750,18 @@
           ],
           "default": null,
           "title": "Result Capture"
+        },
+        "failure_kind": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Failure Kind"
         }
       },
       "required": [
