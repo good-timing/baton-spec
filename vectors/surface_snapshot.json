@@ -84,6 +84,10 @@
           "overall_task",
           "user_goal"
         ],
+        "required_names": [
+          "expected_result",
+          "user_goal"
+        ],
         "mode": "required"
       },
       "instructions_suffix": true

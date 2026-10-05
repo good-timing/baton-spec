@@ -18,6 +18,8 @@
     "error_type": "ValueError",
     "error_body": "simulated failure",
     "duration_ms": 0,
-    "result": null
+    "result": null,
+    "result_capture": null,
+    "failure_kind": null
   }
 }
