@@ -2884,6 +2884,447 @@
       ],
       "title": "ToolCallStartPayload",
       "type": "object"
+    },
+    "ToolListEndEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "sequence_number": {
+          "minimum": 0,
+          "title": "Sequence Number",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_token": {
+          "title": "Consent Token",
+          "type": "string"
+        },
+        "sdk_version": {
+          "default": "0.8.12",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "agent_runtime": {
+          "default": "unknown",
+          "title": "Agent Runtime",
+          "type": "string"
+        },
+        "client_observed": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ClientObserved"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "principal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        },
+        "transport_observed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Observed"
+        },
+        "runtime_meta": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Meta"
+        },
+        "event_type": {
+          "const": "tool_list_end",
+          "default": "tool_list_end",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ToolListEndPayload"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "vendor_id",
+        "session_id",
+        "sequence_number",
+        "captured_at",
+        "consent_token",
+        "payload"
+      ],
+      "title": "ToolListEndEvent",
+      "type": "object"
+    },
+    "ToolListEndPayload": {
+      "additionalProperties": false,
+      "description": "Emitted after ``tools/list`` returns. ``count`` is the length of the\n``tools`` array in that one response, the producer's own tools included.",
+      "properties": {
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        },
+        "duration_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Ms"
+        }
+      },
+      "required": [
+        "count"
+      ],
+      "title": "ToolListEndPayload",
+      "type": "object"
+    },
+    "ToolListErrorEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "sequence_number": {
+          "minimum": 0,
+          "title": "Sequence Number",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_token": {
+          "title": "Consent Token",
+          "type": "string"
+        },
+        "sdk_version": {
+          "default": "0.8.12",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "agent_runtime": {
+          "default": "unknown",
+          "title": "Agent Runtime",
+          "type": "string"
+        },
+        "client_observed": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ClientObserved"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "principal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        },
+        "transport_observed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Observed"
+        },
+        "runtime_meta": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Meta"
+        },
+        "event_type": {
+          "const": "tool_list_error",
+          "default": "tool_list_error",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ToolListErrorPayload"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "vendor_id",
+        "session_id",
+        "sequence_number",
+        "captured_at",
+        "consent_token",
+        "payload"
+      ],
+      "title": "ToolListErrorEvent",
+      "type": "object"
+    },
+    "ToolListErrorPayload": {
+      "additionalProperties": false,
+      "description": "Emitted when ``tools/list`` failed. See\n``ResourceReadErrorPayload`` for how ``error_type`` is spelled.",
+      "properties": {
+        "error_type": {
+          "title": "Error Type",
+          "type": "string"
+        },
+        "error_body": {
+          "title": "Error Body",
+          "type": "string"
+        },
+        "duration_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Ms"
+        }
+      },
+      "required": [
+        "error_type",
+        "error_body"
+      ],
+      "title": "ToolListErrorPayload",
+      "type": "object"
+    },
+    "ToolListStartEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "sequence_number": {
+          "minimum": 0,
+          "title": "Sequence Number",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_token": {
+          "title": "Consent Token",
+          "type": "string"
+        },
+        "sdk_version": {
+          "default": "0.8.12",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "agent_runtime": {
+          "default": "unknown",
+          "title": "Agent Runtime",
+          "type": "string"
+        },
+        "client_observed": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ClientObserved"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "principal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        },
+        "transport_observed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Observed"
+        },
+        "runtime_meta": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Meta"
+        },
+        "event_type": {
+          "const": "tool_list_start",
+          "default": "tool_list_start",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ToolListStartPayload"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "vendor_id",
+        "session_id",
+        "sequence_number",
+        "captured_at",
+        "consent_token",
+        "payload"
+      ],
+      "title": "ToolListStartEvent",
+      "type": "object"
+    },
+    "ToolListStartPayload": {
+      "additionalProperties": false,
+      "description": "Emitted before a ``tools/list`` request is served (SPEC \u00a711.4.5). Empty,\nfor the reason ``ResourceListStartPayload`` carries.",
+      "properties": {},
+      "title": "ToolListStartPayload",
+      "type": "object"
     }
   },
   "discriminator": {
@@ -2904,7 +3345,10 @@
       "surface_snapshot": "#/$defs/SurfaceSnapshotEvent",
       "tool_call_end": "#/$defs/ToolCallEndEvent",
       "tool_call_error": "#/$defs/ToolCallErrorEvent",
-      "tool_call_start": "#/$defs/ToolCallStartEvent"
+      "tool_call_start": "#/$defs/ToolCallStartEvent",
+      "tool_list_end": "#/$defs/ToolListEndEvent",
+      "tool_list_error": "#/$defs/ToolListErrorEvent",
+      "tool_list_start": "#/$defs/ToolListStartEvent"
     },
     "propertyName": "event_type"
   },
@@ -2959,6 +3403,15 @@
     },
     {
       "$ref": "#/$defs/PromptGetErrorEvent"
+    },
+    {
+      "$ref": "#/$defs/ToolListStartEvent"
+    },
+    {
+      "$ref": "#/$defs/ToolListEndEvent"
+    },
+    {
+      "$ref": "#/$defs/ToolListErrorEvent"
     }
   ]
 }
