@@ -2407,16 +2407,9 @@
           "default": null
         },
         "call_id": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Call Id"
+          "minLength": 1,
+          "title": "Call Id",
+          "type": "string"
         },
         "transport_observed": {
           "anyOf": [
@@ -2460,6 +2453,7 @@
         "sequence_number",
         "captured_at",
         "consent_token",
+        "call_id",
         "payload"
       ],
       "title": "ToolCallEndEvent",
@@ -2581,16 +2575,9 @@
           "default": null
         },
         "call_id": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Call Id"
+          "minLength": 1,
+          "title": "Call Id",
+          "type": "string"
         },
         "transport_observed": {
           "anyOf": [
@@ -2634,6 +2621,7 @@
         "sequence_number",
         "captured_at",
         "consent_token",
+        "call_id",
         "payload"
       ],
       "title": "ToolCallErrorEvent",
@@ -2777,16 +2765,9 @@
           "default": null
         },
         "call_id": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Call Id"
+          "minLength": 1,
+          "title": "Call Id",
+          "type": "string"
         },
         "transport_observed": {
           "anyOf": [
@@ -2830,6 +2811,7 @@
         "sequence_number",
         "captured_at",
         "consent_token",
+        "call_id",
         "payload"
       ],
       "title": "ToolCallStartEvent",
