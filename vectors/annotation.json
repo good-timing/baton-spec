@@ -8,6 +8,7 @@
   "consent_token": "ct_spec_vectors",
   "sdk_version": "0.8.12",
   "agent_runtime": "unknown",
+  "client_observed": null,
   "principal": null,
   "call_id": null,
   "transport_observed": null,

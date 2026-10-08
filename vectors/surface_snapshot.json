@@ -8,6 +8,7 @@
   "consent_token": "ct_spec_vectors",
   "sdk_version": "0.8.12",
   "agent_runtime": "unknown",
+  "client_observed": null,
   "principal": null,
   "call_id": null,
   "transport_observed": null,
@@ -86,6 +87,7 @@
         ],
         "required_names": [
           "expected_result",
+          "overall_task",
           "user_goal"
         ],
         "mode": "required"
