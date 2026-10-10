@@ -127,7 +127,7 @@
     },
     "AnnotationPayload": {
       "additionalProperties": false,
-      "description": "Agent-supplied context. All fields nullable per SPEC \u00a75.1.1 \u2014 agent\npopulates what it has. Proactive annotations typically populate\n``intent``/``expected_outcome``/``workflow``; reactive annotations\ntypically populate ``signal_type``/``suggested_improvement``.",
+      "description": "Agent-supplied context. All fields nullable per SPEC \u00a75.1.1. A filled\n``what_happened`` makes the annotation a report (SPEC \u00a711.4); without it\nthe annotation is a note carrying ``intent``/``expected_outcome``/``workflow``.",
       "properties": {
         "intent": {
           "anyOf": [
@@ -152,6 +152,18 @@
           ],
           "default": null,
           "title": "Expected Outcome"
+        },
+        "what_happened": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "What Happened"
         },
         "signal_type": {
           "anyOf": [

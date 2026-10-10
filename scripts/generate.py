@@ -76,7 +76,7 @@ async def _capture_events(events_path: str) -> None:
             sink=FileSink(events_path),
             # Explicit because the DEFAULT moved out from under this script:
             # ``proactive_mode`` now defaults to "off", under which the
-            # annotation tool refuses a signal_type-less call and returns
+            # annotation tool refuses a call with no what_happened and returns
             # ok:False instead of emitting. That is a real product default, but
             # here it silently dropped the ``annotation`` vector — the scenario
             # must exercise every event type, so the mode is pinned rather than
@@ -107,6 +107,14 @@ async def _capture_events(events_path: str) -> None:
             await mcp.call_tool("soft_fail", {})
         except Exception:
             pass
+        await mcp.call_tool(
+            handle.annotation_tool_name,
+            {
+                "user_goal": "look something up",
+                "what_happened": "asked for a match; the tool returned an error with no reason",
+                "tool_name": "soft_fail",
+            },
+        )
     finally:
         await handle.aclose()
 
@@ -160,6 +168,10 @@ def write_vectors() -> None:
         name = event_type
         if event_type == "tool_call_error" and (event.get("payload") or {}).get("result") is not None:
             name = "tool_call_error.returned"
+        # An annotation is a note or a report (SPEC §11.4), told apart by
+        # ``what_happened``; a consumer needs one of each to test that rule.
+        if event_type == "annotation" and (event.get("payload") or {}).get("what_happened"):
+            name = "annotation.report"
         if name in seen_types:
             continue
         seen_types.add(name)
@@ -173,6 +185,7 @@ def write_vectors() -> None:
         "tool_call_error",
         "tool_call_error.returned",
         "annotation",
+        "annotation.report",
         "surface_snapshot",
     } - seen_types
     if missing:

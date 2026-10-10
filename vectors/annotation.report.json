@@ -1,9 +1,9 @@
 {
-  "event_id": "00000000-0000-7000-8000-000000000001",
+  "event_id": "00000000-0000-7000-8000-000000000013",
   "tenant_id": "spec-vectors",
   "vendor_id": "spec-vectors",
   "session_id": "sdk-00000000-0000-7000-8000-000000000002",
-  "sequence_number": 1,
+  "sequence_number": 9,
   "captured_at": "2026-01-01T00:00:00Z",
   "consent_token": "ct_spec_vectors",
   "sdk_version": "0.8.15",
@@ -16,13 +16,13 @@
   "event_type": "annotation",
   "payload": {
     "intent": "look something up",
-    "expected_outcome": "a match",
-    "what_happened": null,
+    "expected_outcome": null,
+    "what_happened": "asked for a match; the tool returned an error with no reason",
     "signal_type": null,
     "workflow": null,
     "suggested_improvement": null,
     "context": null,
     "intent_source": null,
-    "tool_name": null
+    "tool_name": "soft_fail"
   }
 }
