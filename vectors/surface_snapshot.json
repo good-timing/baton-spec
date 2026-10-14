@@ -12,6 +12,7 @@
   "principal": null,
   "call_id": null,
   "transport_observed": null,
+  "session_id_origin": "minted",
   "runtime_meta": null,
   "event_type": "surface_snapshot",
   "payload": {

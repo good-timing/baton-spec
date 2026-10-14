@@ -12,6 +12,7 @@
   "principal": null,
   "call_id": "00000000-0000-7000-8000-000000000005",
   "transport_observed": null,
+  "session_id_origin": "minted",
   "runtime_meta": null,
   "event_type": "tool_call_end",
   "payload": {

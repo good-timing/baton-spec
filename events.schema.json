@@ -90,6 +90,18 @@
           "default": null,
           "title": "Transport Observed"
         },
+        "session_id_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id Origin"
+        },
         "runtime_meta": {
           "anyOf": [
             {
@@ -435,6 +447,18 @@
           "default": null,
           "title": "Transport Observed"
         },
+        "session_id_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id Origin"
+        },
         "runtime_meta": {
           "anyOf": [
             {
@@ -586,6 +610,18 @@
           ],
           "default": null,
           "title": "Transport Observed"
+        },
+        "session_id_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id Origin"
         },
         "runtime_meta": {
           "anyOf": [
@@ -749,6 +785,18 @@
           "default": null,
           "title": "Transport Observed"
         },
+        "session_id_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id Origin"
+        },
         "runtime_meta": {
           "anyOf": [
             {
@@ -902,6 +950,18 @@
           "default": null,
           "title": "Transport Observed"
         },
+        "session_id_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id Origin"
+        },
         "runtime_meta": {
           "anyOf": [
             {
@@ -1053,6 +1113,18 @@
           ],
           "default": null,
           "title": "Transport Observed"
+        },
+        "session_id_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id Origin"
         },
         "runtime_meta": {
           "anyOf": [
@@ -1211,6 +1283,18 @@
           "default": null,
           "title": "Transport Observed"
         },
+        "session_id_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id Origin"
+        },
         "runtime_meta": {
           "anyOf": [
             {
@@ -1342,6 +1426,18 @@
           ],
           "default": null,
           "title": "Transport Observed"
+        },
+        "session_id_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id Origin"
         },
         "runtime_meta": {
           "anyOf": [
@@ -1494,6 +1590,18 @@
           ],
           "default": null,
           "title": "Transport Observed"
+        },
+        "session_id_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id Origin"
         },
         "runtime_meta": {
           "anyOf": [
@@ -1652,6 +1760,18 @@
           "default": null,
           "title": "Transport Observed"
         },
+        "session_id_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id Origin"
+        },
         "runtime_meta": {
           "anyOf": [
             {
@@ -1783,6 +1903,18 @@
           ],
           "default": null,
           "title": "Transport Observed"
+        },
+        "session_id_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id Origin"
         },
         "runtime_meta": {
           "anyOf": [
@@ -1935,6 +2067,18 @@
           ],
           "default": null,
           "title": "Transport Observed"
+        },
+        "session_id_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id Origin"
         },
         "runtime_meta": {
           "anyOf": [
@@ -2098,6 +2242,18 @@
           "default": null,
           "title": "Transport Observed"
         },
+        "session_id_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id Origin"
+        },
         "runtime_meta": {
           "anyOf": [
             {
@@ -2250,6 +2406,18 @@
           ],
           "default": null,
           "title": "Transport Observed"
+        },
+        "session_id_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id Origin"
         },
         "runtime_meta": {
           "anyOf": [
@@ -2435,6 +2603,18 @@
           "default": null,
           "title": "Transport Observed"
         },
+        "session_id_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id Origin"
+        },
         "runtime_meta": {
           "anyOf": [
             {
@@ -2602,6 +2782,18 @@
           ],
           "default": null,
           "title": "Transport Observed"
+        },
+        "session_id_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id Origin"
         },
         "runtime_meta": {
           "anyOf": [
@@ -2792,6 +2984,18 @@
           ],
           "default": null,
           "title": "Transport Observed"
+        },
+        "session_id_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id Origin"
         },
         "runtime_meta": {
           "anyOf": [
@@ -2987,6 +3191,18 @@
           "default": null,
           "title": "Transport Observed"
         },
+        "session_id_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id Origin"
+        },
         "runtime_meta": {
           "anyOf": [
             {
@@ -3138,6 +3354,18 @@
           ],
           "default": null,
           "title": "Transport Observed"
+        },
+        "session_id_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id Origin"
         },
         "runtime_meta": {
           "anyOf": [
@@ -3295,6 +3523,18 @@
           ],
           "default": null,
           "title": "Transport Observed"
+        },
+        "session_id_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id Origin"
         },
         "runtime_meta": {
           "anyOf": [
