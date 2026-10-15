@@ -35,7 +35,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.16",
+          "default": "0.8.17",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -392,7 +392,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.16",
+          "default": "0.8.17",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -556,7 +556,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.16",
+          "default": "0.8.17",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -730,7 +730,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.16",
+          "default": "0.8.17",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -895,7 +895,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.16",
+          "default": "0.8.17",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -1059,7 +1059,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.16",
+          "default": "0.8.17",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -1228,7 +1228,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.16",
+          "default": "0.8.17",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -1372,7 +1372,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.16",
+          "default": "0.8.17",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -1536,7 +1536,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.16",
+          "default": "0.8.17",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -1705,7 +1705,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.16",
+          "default": "0.8.17",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -1849,7 +1849,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.16",
+          "default": "0.8.17",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -2013,7 +2013,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.16",
+          "default": "0.8.17",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -2187,7 +2187,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.16",
+          "default": "0.8.17",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -2352,7 +2352,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.16",
+          "default": "0.8.17",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -2555,7 +2555,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.16",
+          "default": "0.8.17",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -2735,7 +2735,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.16",
+          "default": "0.8.17",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -2937,7 +2937,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.16",
+          "default": "0.8.17",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -3136,7 +3136,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.16",
+          "default": "0.8.17",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -3300,7 +3300,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.16",
+          "default": "0.8.17",
           "title": "Sdk Version",
           "type": "string"
         },
@@ -3469,7 +3469,7 @@
           "type": "string"
         },
         "sdk_version": {
-          "default": "0.8.16",
+          "default": "0.8.17",
           "title": "Sdk Version",
           "type": "string"
         },
