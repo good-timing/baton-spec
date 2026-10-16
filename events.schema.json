@@ -226,18 +226,6 @@
           "default": null,
           "title": "Context"
         },
-        "intent_source": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Intent Source"
-        },
         "tool_name": {
           "anyOf": [
             {
