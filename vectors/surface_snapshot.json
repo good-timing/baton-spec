@@ -82,13 +82,9 @@
       ],
       "intent_param": {
         "names": [
-          "expected_result",
-          "overall_task",
           "user_goal"
         ],
         "required_names": [
-          "expected_result",
-          "overall_task",
           "user_goal"
         ],
         "mode": "required"

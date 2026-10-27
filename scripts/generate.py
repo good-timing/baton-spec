@@ -85,18 +85,12 @@ async def _capture_events(events_path: str) -> None:
         ),
     )
     try:
-        # The TOOL's parameter names are not the payload's field names, and
-        # this call sent the payload's until it started failing: the annotation
-        # tool takes ``user_goal`` / ``expected_result`` (agent-facing wording)
-        # and writes them into the envelope as ``intent`` / ``expected_outcome``.
-        # ``user_goal`` is REQUIRED, so the old spelling raised rather than
-        # producing a wrong vector — which is why only the schema half of this
-        # script had been running.
-        # The tool's name comes from the handle: the SDK derives it from the
-        # server's name, so a literal goes stale.
+        # The tool takes ``user_goal`` and writes it into the envelope as
+        # ``intent``. The tool's name comes from the handle: the SDK derives it
+        # from the server's name, so a literal goes stale.
         await mcp.call_tool(
             handle.annotation_tool_name,
-            {"user_goal": "look something up", "expected_result": "a match"},
+            {"user_goal": "1: look something up; success is a match"},
         )
         await mcp.call_tool("lookup", {"name": "alice"})
         try:

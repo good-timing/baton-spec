@@ -16,8 +16,8 @@
   "runtime_meta": null,
   "event_type": "annotation",
   "payload": {
-    "intent": "look something up",
-    "expected_outcome": "a match",
+    "intent": "1: look something up; success is a match",
+    "expected_outcome": null,
     "what_happened": null,
     "signal_type": null,
     "workflow": null,
