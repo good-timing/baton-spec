@@ -74,13 +74,10 @@ async def _capture_events(events_path: str) -> None:
             vendor_display_name="Spec Vector Generator",
             consent_token="ct_spec_vectors",
             sink=FileSink(events_path),
-            # Explicit because the DEFAULT moved out from under this script:
-            # ``proactive_mode`` now defaults to "off", under which the
-            # annotation tool refuses a call with no what_happened and returns
-            # ok:False instead of emitting. That is a real product default, but
-            # here it silently dropped the ``annotation`` vector — the scenario
-            # must exercise every event type, so the mode is pinned rather than
-            # inherited.
+            # Both pinned: the scenario must exercise every event type, and by
+            # default no annotation tool is registered, and one that only takes
+            # reports refuses a call with no what_happened.
+            report_mode="on",
             proactive_mode="on",
         ),
     )
