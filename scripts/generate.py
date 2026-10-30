@@ -74,21 +74,11 @@ async def _capture_events(events_path: str) -> None:
             vendor_display_name="Spec Vector Generator",
             consent_token="ct_spec_vectors",
             sink=FileSink(events_path),
-            # Both pinned: the scenario must exercise every event type, and by
-            # default no annotation tool is registered, and one that only takes
-            # reports refuses a call with no what_happened.
+            # By default no annotation tool is registered.
             report_mode="on",
-            proactive_mode="on",
         ),
     )
     try:
-        # The tool takes ``user_goal`` and writes it into the envelope as
-        # ``intent``. The tool's name comes from the handle: the SDK derives it
-        # from the server's name, so a literal goes stale.
-        await mcp.call_tool(
-            handle.annotation_tool_name,
-            {"user_goal": "1: look something up; success is a match"},
-        )
         await mcp.call_tool("lookup", {"name": "alice"})
         try:
             await mcp.call_tool("boom", {})
@@ -98,6 +88,8 @@ async def _capture_events(events_path: str) -> None:
             await mcp.call_tool("soft_fail", {})
         except Exception:
             pass
+        # The tool's name comes from the handle: the SDK derives it from the
+        # server's name, so a literal goes stale.
         await mcp.call_tool(
             handle.annotation_tool_name,
             {
@@ -160,8 +152,10 @@ def write_vectors() -> None:
         if event_type == "tool_call_error" and (event.get("payload") or {}).get("result") is not None:
             name = "tool_call_error.returned"
         # An annotation is a note or a report (SPEC §11.4), told apart by
-        # ``what_happened``; a consumer needs one of each to test that rule.
-        if event_type == "annotation" and (event.get("payload") or {}).get("what_happened"):
+        # ``what_happened``. The SDK no longer files notes, so ``annotation.json``
+        # is not regenerated: it stays as the note older producers still send,
+        # for a consumer to test that rule against.
+        if event_type == "annotation":
             name = "annotation.report"
         if name in seen_types:
             continue
@@ -175,7 +169,6 @@ def write_vectors() -> None:
         "tool_call_end",
         "tool_call_error",
         "tool_call_error.returned",
-        "annotation",
         "annotation.report",
         "surface_snapshot",
     } - seen_types
