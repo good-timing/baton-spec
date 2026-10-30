@@ -66,6 +66,17 @@
           ],
           "default": null
         },
+        "organization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OrganizationWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "call_id": {
           "anyOf": [
             {
@@ -308,6 +319,43 @@
       "title": "ClientObserved",
       "type": "object"
     },
+    "OrganizationWire": {
+      "additionalProperties": false,
+      "description": "The organization AS EMITTED (SPEC \u00a711.4): the company the caller\nbelongs to, with ``principal``'s members and rules and its own ``form``.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "form": {
+          "title": "Form",
+          "type": "string"
+        },
+        "display_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Display Name"
+        }
+      },
+      "required": [
+        "id",
+        "source",
+        "form"
+      ],
+      "title": "OrganizationWire",
+      "type": "object"
+    },
     "PrincipalWire": {
       "additionalProperties": false,
       "description": "The principal AS EMITTED \u2014 the finished envelope value (SPEC \u00a711.4).\n\n\u26a0 **Not ``baton.Principal``, and the two are easy to confuse.** That one is\nwhat a vendor's ``resolve_principal`` hook HANDS US. This one is what we\nPUT ON THE WIRE: the same value, with ``source`` added.\n\n**The first three members are REQUIRED, and that is the guarantee the\nobject exists to give.** A producer emits all three or omits\n``principal`` entirely (``display_name`` rides only on a complete object); a partial object is malformed, not a degraded reading. So there\nis no conformant event carrying an ``id`` whose ``form`` a consumer has to\nguess, and none carrying a ``source`` for an identity nobody resolved. That\nbinding is structural here precisely because its predecessor \u2014 a scheme\nprefix plus a paragraph of prose \u2014 was not.",
@@ -404,6 +452,17 @@
           "anyOf": [
             {
               "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "organization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OrganizationWire"
             },
             {
               "type": "null"
@@ -568,6 +627,17 @@
           "anyOf": [
             {
               "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "organization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OrganizationWire"
             },
             {
               "type": "null"
@@ -749,6 +819,17 @@
           ],
           "default": null
         },
+        "organization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OrganizationWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "call_id": {
           "anyOf": [
             {
@@ -914,6 +995,17 @@
           ],
           "default": null
         },
+        "organization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OrganizationWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "call_id": {
           "anyOf": [
             {
@@ -1071,6 +1163,17 @@
           "anyOf": [
             {
               "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "organization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OrganizationWire"
             },
             {
               "type": "null"
@@ -1247,6 +1350,17 @@
           ],
           "default": null
         },
+        "organization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OrganizationWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "call_id": {
           "anyOf": [
             {
@@ -1384,6 +1498,17 @@
           "anyOf": [
             {
               "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "organization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OrganizationWire"
             },
             {
               "type": "null"
@@ -1548,6 +1673,17 @@
           "anyOf": [
             {
               "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "organization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OrganizationWire"
             },
             {
               "type": "null"
@@ -1724,6 +1860,17 @@
           ],
           "default": null
         },
+        "organization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OrganizationWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "call_id": {
           "anyOf": [
             {
@@ -1861,6 +2008,17 @@
           "anyOf": [
             {
               "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "organization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OrganizationWire"
             },
             {
               "type": "null"
@@ -2025,6 +2183,17 @@
           "anyOf": [
             {
               "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "organization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OrganizationWire"
             },
             {
               "type": "null"
@@ -2206,6 +2375,17 @@
           ],
           "default": null
         },
+        "organization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OrganizationWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "call_id": {
           "anyOf": [
             {
@@ -2364,6 +2544,17 @@
           "anyOf": [
             {
               "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "organization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OrganizationWire"
             },
             {
               "type": "null"
@@ -2574,6 +2765,17 @@
           ],
           "default": null
         },
+        "organization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OrganizationWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "call_id": {
           "minLength": 1,
           "title": "Call Id",
@@ -2747,6 +2949,17 @@
           "anyOf": [
             {
               "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "organization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OrganizationWire"
             },
             {
               "type": "null"
@@ -2956,6 +3169,17 @@
           ],
           "default": null
         },
+        "organization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OrganizationWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "call_id": {
           "minLength": 1,
           "title": "Call Id",
@@ -3155,6 +3379,17 @@
           ],
           "default": null
         },
+        "organization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OrganizationWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "call_id": {
           "anyOf": [
             {
@@ -3312,6 +3547,17 @@
           "anyOf": [
             {
               "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "organization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OrganizationWire"
             },
             {
               "type": "null"
@@ -3481,6 +3727,17 @@
           "anyOf": [
             {
               "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "organization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OrganizationWire"
             },
             {
               "type": "null"

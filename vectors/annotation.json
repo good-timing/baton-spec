@@ -10,6 +10,7 @@
   "agent_runtime": "unknown",
   "client_observed": null,
   "principal": null,
+  "organization": null,
   "call_id": null,
   "transport_observed": null,
   "session_id_origin": "minted",
