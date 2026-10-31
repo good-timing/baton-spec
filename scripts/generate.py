@@ -161,6 +161,11 @@ def _pin_volatile(events: list[dict[str, Any]]) -> None:
             event["payload"]["duration_ms"] = 0
 
 
+def _read_jsonl(path: str) -> list[dict[str, Any]]:
+    with open(path) as f:
+        return [json.loads(line) for line in f if line.strip()]
+
+
 def write_vectors() -> None:
     import tempfile
 
@@ -169,10 +174,8 @@ def write_vectors() -> None:
         identified_path = str(Path(tmp) / "identified.jsonl")
         asyncio.run(_capture_events(events_path))
         asyncio.run(_capture_identified_events(identified_path))
-        with open(events_path) as f:
-            events = [json.loads(line) for line in f if line.strip()]
-        with open(identified_path) as f:
-            identified = [json.loads(line) for line in f if line.strip()]
+        events = _read_jsonl(events_path)
+        identified = _read_jsonl(identified_path)
     # Pinned together so the two scenarios never share a pinned id.
     _pin_volatile(events + identified)
 
@@ -203,7 +206,9 @@ def write_vectors() -> None:
         out.write_text(json.dumps(event, indent=2) + "\n")
         print(f"wrote vectors/{name}.json")
 
-    identified_start = next(e for e in identified if e["event_type"] == "tool_call_start")
+    identified_start = next((e for e in identified if e["event_type"] == "tool_call_start"), None)
+    if identified_start is None:
+        raise SystemExit("the identified scenario produced no tool_call_start")
     (vectors_dir / "tool_call_start.identified.json").write_text(json.dumps(identified_start, indent=2) + "\n")
     print("wrote vectors/tool_call_start.identified.json")
 
