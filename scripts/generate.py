@@ -8,7 +8,7 @@ Usage (run from a baton checkout with baton-sdk installed, e.g. its own
 
 The schema is exported directly from baton.events.Event (the discriminated
 union all producers must match). The vectors are real emitted envelopes —
-captured by driving one scenario through the mcp adapter (the capture path
+captured by driving two scenarios through the mcp adapter (the capture path
 that exercises every event type, including surface_snapshot, which only the
 mcp/fastmcp adapters emit) and reading back FileSink's JSONL output — not
 hand-authored examples, so they can't drift from what the SDK actually puts
