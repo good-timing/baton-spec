@@ -17,6 +17,9 @@ producer owns this repo; it's the neutral thing they all agree with.
   (`tool_call_error.returned`, `annotation.report`) and one with intent and
   identity filled (`tool_call_start.identified`). Which members a producer
   may differ on is SPEC §11.4.6.
+- `scrub/cases.json` — generated inputs with what `baton-sdk`'s default
+  `Scrubber` returns for each, and its redaction counts (SPEC §7). A
+  producer's scrubber should give the same output and counts for every case.
 
 ## Using this from a producer repo
 
@@ -38,7 +41,7 @@ In CI, remember to check out submodules
 
 `baton-sdk` (Python, in the sibling `baton` repo) is the reference
 implementation. To regenerate `events.schema.json` and `vectors/*.json`
-after a spec change:
+and `scrub/cases.json` after a spec change:
 
 ```sh
 cd ../baton && .venv/bin/python ../baton-spec/scripts/generate.py

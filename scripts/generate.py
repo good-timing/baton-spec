@@ -1,5 +1,5 @@
-"""Regenerate events.schema.json and vectors/*.json from the reference
-implementation (baton-sdk, Python).
+"""Regenerate events.schema.json, vectors/*.json and scrub/cases.json from
+the reference implementation (baton-sdk, Python).
 
 Usage (run from a baton checkout with baton-sdk installed, e.g. its own
 .venv):
@@ -224,6 +224,133 @@ def write_vectors() -> None:
         raise SystemExit(f"scenario did not produce every event type, missing: {missing}")
 
 
+# Every character Python's or JS's `\s` matches, plus U+180E and U+200B, which
+# neither does, so a producer whose whitespace set differs from SPEC §7's shows up.
+_SPACES = (
+    " \t\n\r\f\v\x1c\x1d\x1e\x1f\x85\xa0\u1680\u180e"
+    + "".join(chr(c) for c in range(0x2000, 0x200C))
+    + "\u2028\u2029\u202f\u205f\u3000\ufeff"
+)
+_FOREIGN_DIGITS = ["٠١٢٣٤٥٦٧٨٩", "०१२३४५६७८९", "０１２３４５６７８９"]
+# What sits beside a match: ASCII, then characters a Unicode-aware `\b` or case fold reads differently.
+_EDGES = ["", " ", "a", "Z", "7", "_", "-", ".", "(", "\u00e9", "\u00df", "\u0131", "\u0130", "\u212a", "\u017f", "\u03a9", "\U0001f600", "x\u0301"]
+_FIELD_KEYS = [
+    "email", "Email", "PHONE", "ssn", "api_key", "API_KEY", "token", "Token", "secret", "password",
+    "PassWord", "user_name", "USER_NAME", "TO\u212aEN", "pa\u017f\u017fword",
+]
+_PLAIN_KEYS = ["tokens", "username", "note"]
+# SPEC §7's set, mostly used so phone and bearer matches are common.
+_IN_SET_SPACES = " \t\n\r\f\xa0"
+
+
+def _scrub_input(rng: Any) -> Any:
+    def sep() -> str:
+        if rng.random() < 0.7:
+            return rng.choice(["", "-", ".", *_IN_SET_SPACES])
+        return rng.choice(_SPACES)
+
+    def digits(n: int) -> str:
+        out = "".join(rng.choice("0123456789") for _ in range(n))
+        if n and rng.random() < 0.15:
+            table = rng.choice(_FOREIGN_DIGITS)
+            i = rng.randrange(n)
+            out = out[:i] + table[int(out[i])] + out[i + 1 :]
+        return out
+
+    def card() -> str:
+        body = [rng.randrange(10) for _ in range(rng.choice([12, 13, 15, 18, 19]))]
+        total = sum(d if i % 2 else (d * 2 - 9 if d * 2 > 9 else d * 2) for i, d in enumerate(reversed(body)))
+        check = (10 - total % 10) % 10
+        if rng.random() < 0.3:
+            check = (check + 1) % 10
+        return "".join(map(str, [*body, check]))
+
+    def chars(alphabet: str, n: int) -> str:
+        return "".join(rng.choice(alphabet) for _ in range(n))
+
+    b64 = lambda n: chars("ABCxyz0189_-", n)
+    domain = lambda: rng.choice(["example.com", "ex.co", "x.c", "mail.example.org"])
+    local_part = lambda: rng.choice(["jane", "j.doe+x", "a_b", "\u00e9", b64(4)])
+    email = lambda: f"{local_part()}@{domain()}"
+    phone = lambda: f"{rng.choice(['', '+1', '1'])}{sep()}{rng.choice(['(555)', '555'])}{sep()}{digits(3)}{sep()}{digits(4)}"
+    jwt = lambda: f"eyJ{b64(rng.randrange(1, 8))}.{b64(rng.randrange(0, 8))}.{b64(rng.randrange(1, 8))}"
+    bearer = lambda: f"{rng.choice(['Bearer', 'bearer', 'BEARER'])}{sep()}{chars('ABCxyz0189_-.+/=', rng.choice([15, 16, 24]))}"
+    sk_key = lambda: f"sk-{b64(rng.choice([19, 20, 30]))}"
+    aws_key = lambda: "AKIA" + chars("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", rng.choice([15, 16, 17]))
+    long_number = lambda: digits(rng.randrange(8, 21))
+    # Two rules wanting the same text, so a producer that runs them in another order shows up.
+    contested = lambda: rng.choice(
+        [
+            lambda: f"Bearer {jwt()}",
+            lambda: f"{sk_key()}@{domain()}",
+            lambda: f"{aws_key()}@{domain()}",
+            lambda: f"{digits(rng.randrange(0, 6))}{phone()}{digits(rng.randrange(0, 6))}",
+            lambda: f"{phone()}@{domain()}",
+            lambda: f"{card()}@example.com",
+        ]
+    )()
+    # Phone and bearer are the patterns whitespace reaches, so they come up most.
+    makers = [email, phone, phone, phone, card, jwt, bearer, bearer, bearer, sk_key, aws_key, long_number, contested, contested]
+
+    def text() -> str:
+        parts = [rng.choice(_EDGES) + rng.choice(makers)() + rng.choice(_EDGES) for _ in range(rng.choice([1, 1, 2]))]
+        return rng.choice(["", " ", "\t", ";"]).join(parts)
+
+    def leaf() -> Any:
+        return rng.choice([text, text, text, lambda: "", lambda: rng.randrange(-10, 10**12), lambda: 1.5, lambda: True, lambda: None])()
+
+    def keys(n: int) -> list[str]:
+        # A key holding PII too: keys are not scrubbed, only values.
+        return rng.sample([*_FIELD_KEYS, *_PLAIN_KEYS, email()], n)
+
+    def tree(depth: int) -> Any:
+        if depth == 0 or rng.random() < 0.3:
+            return leaf()
+        if rng.random() < 0.5:
+            return [tree(depth - 1) for _ in range(rng.randrange(0, 3))]
+        return {k: tree(depth - 1) for k in keys(rng.randrange(0, 3))}
+
+    kind = rng.random()
+    if kind < 0.55:
+        return text()
+    if kind < 0.85:
+        return tree(4)
+    # Straddles the depth limit (SPEC §7), with field keys on the way down and
+    # a container, maybe empty, at the bottom.
+    node: Any = rng.choice([text(), [], {}, [text()], {keys(1)[0]: text()}])
+    for _ in range(rng.randrange(8, 13)):
+        node = [node] if rng.random() < 0.5 else {keys(1)[0]: node}
+    return node
+
+
+def write_scrub_cases(count: int = 800) -> None:
+    import random
+
+    from baton.scrub import _PATTERNS, REDACT_FIELD_NAMES, Scrubber
+
+    rng = random.Random(7)
+    cases = []
+    for _ in range(count):
+        # Parsed back so Python scrubs exactly the value every producer reads.
+        value = json.loads(json.dumps(_scrub_input(rng)))
+        scrubber = Scrubber()
+        output = scrubber(value)
+        cases.append({"input": value, "output": output, "counts": dict(sorted(scrubber.counts.items()))})
+    hit = {category for case in cases for category in case["counts"]}
+    categories = {category for category, _ in _PATTERNS} | {"cc", "depth_limit"}
+    missing = (categories | {f"field:{name}" for name in REDACT_FIELD_NAMES}) - hit
+    if missing:
+        raise SystemExit(f"the scrub cases redact nothing under {sorted(missing)}")
+    out = ROOT / "scrub" / "cases.json"
+    out.parent.mkdir(exist_ok=True)
+    # One case per line, so a regeneration diffs per case; ASCII escapes keep
+    # U+00A0 and U+2003 apart from a space in that diff.
+    out.write_text("[\n" + ",\n".join(json.dumps(case, ensure_ascii=True) for case in cases) + "\n]\n")
+    print(f"wrote scrub/cases.json ({count} cases)")
+
+
 if __name__ == "__main__":
+    # First, so its coverage check stops the run before anything is written.
+    write_scrub_cases()
     write_schema()
     write_vectors()
