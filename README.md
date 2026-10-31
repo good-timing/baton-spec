@@ -11,9 +11,12 @@ producer owns this repo; it's the neutral thing they all agree with.
 - `events.schema.json` — JSON Schema for the discriminated event union
   (`tool_call_start`, `tool_call_end`, `tool_call_error`, `annotation`,
   `surface_snapshot`), exported directly from `baton-sdk`'s Pydantic models.
-- `vectors/*.json` — one real, conformant example event per type, captured
-  from an actual SDK run (not hand-authored), for producer test suites to
-  validate against.
+- `vectors/*.json` — real, conformant example events, captured from an
+  actual SDK run (not hand-authored), for producer test suites to validate
+  against. One per type, plus a second shape where a type has two
+  (`tool_call_error.returned`, `annotation.report`) and one with intent and
+  identity filled (`tool_call_start.identified`). Which members a producer
+  may differ on is SPEC §11.4.6.
 
 ## Using this from a producer repo
 

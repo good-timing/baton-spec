@@ -1,0 +1,39 @@
+{
+  "event_id": "00000000-0000-7000-8000-000000000015",
+  "tenant_id": "spec-vectors",
+  "vendor_id": "spec-vectors",
+  "session_id": "sdk-00000000-0000-7000-8000-000000000014",
+  "sequence_number": 2,
+  "captured_at": "2026-01-01T00:00:00Z",
+  "consent_token": "ct_spec_vectors",
+  "sdk_version": "0.9.1",
+  "agent_runtime": "unknown",
+  "client_observed": null,
+  "principal": {
+    "id": "user-123",
+    "source": "asserted",
+    "form": "raw",
+    "display_name": "Jane"
+  },
+  "organization": {
+    "id": "org-456",
+    "source": "asserted",
+    "form": "raw",
+    "display_name": "Acme"
+  },
+  "call_id": "00000000-0000-7000-8000-000000000016",
+  "transport_observed": null,
+  "session_id_origin": "minted",
+  "runtime_meta": null,
+  "event_type": "tool_call_start",
+  "payload": {
+    "tool_name": "lookup",
+    "params": {
+      "name": "alice"
+    },
+    "call_intent": "1: find alice; success is a match",
+    "call_expected": null,
+    "call_workflow": null,
+    "intent_source": "injected_param"
+  }
+}

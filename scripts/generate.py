@@ -102,6 +102,40 @@ async def _capture_events(events_path: str) -> None:
         await handle.aclose()
 
 
+async def _capture_identified_events(events_path: str) -> None:
+    from baton import Organization, Principal
+    from baton.integrations.official import VendorConfig, install_baton
+    from baton.integrations.official._compat import MCPServerClass as FastMCP
+    from baton.sinks import FileSink
+
+    mcp = FastMCP("spec-vector-generator")
+
+    @mcp.tool()
+    def lookup(name: str) -> dict[str, Any]:
+        return {"found": True, "name": name}
+
+    def resolve_principal(_context: Any) -> Principal:
+        return Principal(
+            principal_id="user-123",
+            display_name="Jane",
+            organization=Organization(organization_id="org-456", display_name="Acme"),
+        )
+
+    handle = install_baton(
+        mcp,
+        VendorConfig(
+            vendor_id="spec-vectors",
+            consent_token="ct_spec_vectors",
+            sink=FileSink(events_path),
+            resolve_principal=resolve_principal,
+        ),
+    )
+    try:
+        await mcp.call_tool("lookup", {"name": "alice", "user_goal": "1: find alice; success is a match"})
+    finally:
+        await handle.aclose()
+
+
 _UUID = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
 
 
@@ -132,10 +166,15 @@ def write_vectors() -> None:
 
     with tempfile.TemporaryDirectory() as tmp:
         events_path = str(Path(tmp) / "events.jsonl")
+        identified_path = str(Path(tmp) / "identified.jsonl")
         asyncio.run(_capture_events(events_path))
+        asyncio.run(_capture_identified_events(identified_path))
         with open(events_path) as f:
             events = [json.loads(line) for line in f if line.strip()]
-    _pin_volatile(events)
+        with open(identified_path) as f:
+            identified = [json.loads(line) for line in f if line.strip()]
+    # Pinned together so the two scenarios never share a pinned id.
+    _pin_volatile(events + identified)
 
     vectors_dir = ROOT / "vectors"
     vectors_dir.mkdir(exist_ok=True)
@@ -163,6 +202,10 @@ def write_vectors() -> None:
         out = vectors_dir / f"{name}.json"
         out.write_text(json.dumps(event, indent=2) + "\n")
         print(f"wrote vectors/{name}.json")
+
+    identified_start = next(e for e in identified if e["event_type"] == "tool_call_start")
+    (vectors_dir / "tool_call_start.identified.json").write_text(json.dumps(identified_start, indent=2) + "\n")
+    print("wrote vectors/tool_call_start.identified.json")
 
     missing = {
         "tool_call_start",
