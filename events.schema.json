@@ -319,6 +319,179 @@
       "title": "ClientObserved",
       "type": "object"
     },
+    "ClientReportEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "format": "uuid",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "sequence_number": {
+          "minimum": 0,
+          "title": "Sequence Number",
+          "type": "integer"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_token": {
+          "title": "Consent Token",
+          "type": "string"
+        },
+        "sdk_version": {
+          "default": "0.9.1",
+          "title": "Sdk Version",
+          "type": "string"
+        },
+        "agent_runtime": {
+          "default": "unknown",
+          "title": "Agent Runtime",
+          "type": "string"
+        },
+        "client_observed": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ClientObserved"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "principal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrincipalWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "organization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OrganizationWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        },
+        "transport_observed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Observed"
+        },
+        "session_id_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id Origin"
+        },
+        "runtime_meta": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Meta"
+        },
+        "event_type": {
+          "const": "client_report",
+          "default": "client_report",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ClientReportPayload"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "vendor_id",
+        "session_id",
+        "sequence_number",
+        "captured_at",
+        "consent_token",
+        "payload"
+      ],
+      "title": "ClientReportEvent",
+      "type": "object"
+    },
+    "ClientReportPayload": {
+      "additionalProperties": false,
+      "description": "This process's lost-event counts by reason, as running totals (SPEC \u00a711.4.7).",
+      "properties": {
+        "instance_id": {
+          "format": "uuid",
+          "title": "Instance Id",
+          "type": "string"
+        },
+        "dropped": {
+          "additionalProperties": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Dropped",
+          "type": "object"
+        }
+      },
+      "required": [
+        "instance_id",
+        "dropped"
+      ],
+      "title": "ClientReportPayload",
+      "type": "object"
+    },
     "OrganizationWire": {
       "additionalProperties": false,
       "description": "The organization AS EMITTED (SPEC \u00a711.4): the company the caller\nbelongs to, with ``principal``'s members and rules and its own ``form``.",
@@ -3827,6 +4000,7 @@
   "discriminator": {
     "mapping": {
       "annotation": "#/$defs/AnnotationEvent",
+      "client_report": "#/$defs/ClientReportEvent",
       "prompt_get_end": "#/$defs/PromptGetEndEvent",
       "prompt_get_error": "#/$defs/PromptGetErrorEvent",
       "prompt_get_start": "#/$defs/PromptGetStartEvent",
@@ -3864,6 +4038,9 @@
     },
     {
       "$ref": "#/$defs/SurfaceSnapshotEvent"
+    },
+    {
+      "$ref": "#/$defs/ClientReportEvent"
     },
     {
       "$ref": "#/$defs/ResourceListStartEvent"
