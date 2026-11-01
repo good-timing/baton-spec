@@ -239,6 +239,9 @@ _FIELD_KEYS = [
     "PassWord", "user_name", "USER_NAME", "TO\u212aEN", "pa\u017f\u017fword",
 ]
 _PLAIN_KEYS = ["tokens", "username", "note"]
+# A key matches a field name by plain lowercase, not case folding. Python and JS
+# lower U+0130 to "i\u0307", which is no field name; Go lowers it to "i".
+_DOTTED_I_KEYS = ["AP\u0130_KEY", "EMA\u0130L"]
 # SPEC §7's set, mostly used so phone and bearer matches are common.
 _IN_SET_SPACES = " \t\n\r\f\xa0"
 
@@ -323,30 +326,34 @@ def _scrub_input(rng: Any) -> Any:
     return node
 
 
-def write_scrub_cases(count: int = 800) -> None:
+def write_scrub_cases(random_count: int = 800) -> None:
     import random
 
     from baton.scrub import _PATTERNS, REDACT_FIELD_NAMES, Scrubber
 
-    rng = random.Random(7)
-    cases = []
-    for _ in range(count):
+    def scrubbed(value: Any) -> dict[str, Any]:
         # Parsed back so Python scrubs exactly the value every producer reads.
-        value = json.loads(json.dumps(_scrub_input(rng)))
+        value = json.loads(json.dumps(value))
         scrubber = Scrubber()
         output = scrubber(value)
-        cases.append({"input": value, "output": output, "counts": dict(sorted(scrubber.counts.items()))})
+        return {"input": value, "output": output, "counts": dict(sorted(scrubber.counts.items()))}
+
+    rng = random.Random(7)
+    cases = [scrubbed(_scrub_input(rng)) for _ in range(random_count)]
     hit = {category for case in cases for category in case["counts"]}
     categories = {category for category, _ in _PATTERNS} | {"cc", "depth_limit"}
     missing = (categories | {f"field:{name}" for name in REDACT_FIELD_NAMES}) - hit
     if missing:
         raise SystemExit(f"the scrub cases redact nothing under {sorted(missing)}")
+    # One case per key with nothing above it: in a random case a parent key or the
+    # depth limit can decide the value.
+    cases += [scrubbed({key: "v"}) for key in [*_FIELD_KEYS, *_PLAIN_KEYS, *_DOTTED_I_KEYS]]
     out = ROOT / "scrub" / "cases.json"
     out.parent.mkdir(exist_ok=True)
     # One case per line, so a regeneration diffs per case; ASCII escapes keep
     # U+00A0 and U+2003 apart from a space in that diff.
     out.write_text("[\n" + ",\n".join(json.dumps(case, ensure_ascii=True) for case in cases) + "\n]\n")
-    print(f"wrote scrub/cases.json ({count} cases)")
+    print(f"wrote scrub/cases.json ({len(cases)} cases)")
 
 
 if __name__ == "__main__":
