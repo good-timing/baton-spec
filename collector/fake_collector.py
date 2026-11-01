@@ -4,8 +4,9 @@
 
 Prints the port it listens on as the first line of stdout. ``POST
 /v0/events`` with a bearer key answers by mode; any other POST gets 404 or
-401. ``GET /_received`` returns the sequence numbers it accepted and how
-many requests it got. Standard library only, so any SDK's CI can run it.
+401. ``GET /_received`` returns the sequence numbers it accepted, how many
+requests it got, and how many ``client_report`` events it accepted, which
+are kept apart from the events. Standard library only, so any SDK's CI can run it.
 Stop it by killing the process: a ``hang`` request never ends on its own.
 """
 
@@ -29,6 +30,7 @@ class _Collector(ThreadingHTTPServer):
         self.delay = delay_ms / 1000
         self.accepted: set[int] = set()
         self.requests = 0
+        self.reports = 0
         self.lock = threading.Lock()
 
 
@@ -40,7 +42,11 @@ class _Handler(BaseHTTPRequestHandler):
             self._answer(404)
             return
         with self.server.lock:
-            body = {"accepted": sorted(self.server.accepted), "requests": self.server.requests}
+            body = {
+                "accepted": sorted(self.server.accepted),
+                "requests": self.server.requests,
+                "reports": self.server.reports,
+            }
         self._answer(200, json.dumps(body).encode())
 
     def do_POST(self) -> None:
@@ -65,12 +71,16 @@ class _Handler(BaseHTTPRequestHandler):
         if mode == "slow":
             time.sleep(self.server.delay)
         try:
-            sequence = json.loads(body)["sequence_number"]
+            event = json.loads(body)
+            sequence = event["sequence_number"]
         except (ValueError, KeyError, TypeError):
             self._answer(400)
             return
         with self.server.lock:
-            self.server.accepted.add(sequence)
+            if event.get("event_type") == "client_report":
+                self.server.reports += 1
+            else:
+                self.server.accepted.add(sequence)
         self._answer(202)
 
     def _answer(self, status: int, body: bytes = b"") -> None:

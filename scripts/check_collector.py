@@ -28,12 +28,15 @@ EXPECTED: dict[str, tuple[int | str, float]] = {
 }
 
 
-def _post(port: int, path: str = "/v0/events", key: bool = True) -> tuple[int | str, float]:
+def _post(
+    port: int, path: str = "/v0/events", key: bool = True, event_type: str = "tool_call_start"
+) -> tuple[int | str, float]:
     connection = http.client.HTTPConnection("127.0.0.1", port, timeout=0.5)
     headers = {"Authorization": "Bearer k"} if key else {}
     started = time.monotonic()
     try:
-        connection.request("POST", path, json.dumps({"sequence_number": 7}), headers)
+        body = {"event_type": event_type, "sequence_number": 7}
+        connection.request("POST", path, json.dumps(body), headers)
         return connection.getresponse().status, time.monotonic() - started
     except socket.timeout:
         return "timeout", time.monotonic() - started
@@ -43,11 +46,11 @@ def _post(port: int, path: str = "/v0/events", key: bool = True) -> tuple[int | 
         connection.close()
 
 
-def _received(port: int) -> list[int]:
+def _received(port: int) -> tuple[list[int], int]:
     connection = http.client.HTTPConnection("127.0.0.1", port, timeout=1)
     connection.request("GET", "/_received")
-    accepted: list[int] = json.load(connection.getresponse())["accepted"]
-    return accepted
+    received = json.load(connection.getresponse())
+    return received["accepted"], received["reports"]
 
 
 def main() -> int:
@@ -71,14 +74,22 @@ def main() -> int:
             wrong_path, _ = _post(port, path="/v1/events")
             no_key, _ = _post(port, key=False)
             got, took = _post(port)
-            accepted = _received(port)
+            if want == 202:
+                _post(port, event_type="client_report")
+            accepted, reports = _received(port)
         finally:
             process.kill()
             process.wait()
-        want_accepted = [7] if want == 202 else []
-        ok = (got, wrong_path, no_key, accepted) == (want, 404, 401, want_accepted) and took >= least
+        want_accepted, want_reports = ([7], 1) if want == 202 else ([], 0)
+        ok = (got, wrong_path, no_key, accepted, reports) == (
+            want,
+            404,
+            401,
+            want_accepted,
+            want_reports,
+        ) and took >= least
         failed |= not ok
-        print(f"{'ok  ' if ok else 'FAIL'} {mode}: {got} in {took:.2f}s, accepted {accepted}")
+        print(f"{'ok  ' if ok else 'FAIL'} {mode}: {got} in {took:.2f}s, accepted {accepted}, reports {reports}")
     return 1 if failed else 0
 
 
