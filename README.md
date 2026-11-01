@@ -20,6 +20,11 @@ producer owns this repo; it's the neutral thing they all agree with.
 - `scrub/cases.json` — generated inputs with what `baton-sdk`'s default
   `Scrubber` returns for each, and its redaction counts (SPEC §7). A
   producer's scrubber should give the same output and counts for every case.
+- `collector/fake_collector.py` and `collector/scenarios.json` — a collector
+  that fails on purpose (slow, 500, 429, 400, hang, disconnect), and the
+  scenarios each SDK runs its HTTP sink through. The checks are yes or no:
+  writes never block, close keeps its limit, nothing raises, and every event
+  is delivered or counted. Python 3, standard library only.
 
 ## Using this from a producer repo
 
