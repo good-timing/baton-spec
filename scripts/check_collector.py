@@ -52,6 +52,23 @@ BATCH: dict[str, tuple[int | str, list[str]]] = {
 THEN: dict[str, list[int]] = {"refuse_first": [202, 202]}
 
 
+def _request(port: int, path: str, body: object, key: bool = True) -> tuple[int | str, float, dict[str, str], bytes]:
+    """A POST's status (or "timeout" or "closed"), how long it took, its headers and its body."""
+    connection = http.client.HTTPConnection("127.0.0.1", port, timeout=0.5)
+    headers = {"Authorization": "Bearer k"} if key else {}
+    started = time.monotonic()
+    try:
+        connection.request("POST", path, json.dumps(body), headers)
+        response = connection.getresponse()
+        return response.status, time.monotonic() - started, dict(response.getheaders()), response.read()
+    except socket.timeout:
+        return "timeout", time.monotonic() - started, {}, b""
+    except (http.client.RemoteDisconnected, ConnectionError):
+        return "closed", time.monotonic() - started, {}, b""
+    finally:
+        connection.close()
+
+
 def _post(
     port: int,
     path: str = "/v0/events",
@@ -59,41 +76,22 @@ def _post(
     event_type: str = "tool_call_start",
     sequence: int = 7,
 ) -> tuple[int | str, float]:
-    connection = http.client.HTTPConnection("127.0.0.1", port, timeout=0.5)
-    headers = {"Authorization": "Bearer k"} if key else {}
-    started = time.monotonic()
-    try:
-        body = {"event_type": event_type, "sequence_number": sequence}
-        connection.request("POST", path, json.dumps(body), headers)
-        return connection.getresponse().status, time.monotonic() - started
-    except socket.timeout:
-        return "timeout", time.monotonic() - started
-    except (http.client.RemoteDisconnected, ConnectionError):
-        return "closed", time.monotonic() - started
-    finally:
-        connection.close()
+    status, took, _, _ = _request(port, path, {"event_type": event_type, "sequence_number": sequence}, key)
+    return status, took
 
 
 def _post_batch(port: int, body: object) -> tuple[int | str, list[str]]:
     """A batch's status, and each event's result on a 200."""
-    connection = http.client.HTTPConnection("127.0.0.1", port, timeout=0.5)
-    try:
-        connection.request("POST", "/v0/events/batch", json.dumps(body), {"Authorization": "Bearer k"})
-        response = connection.getresponse()
-        if response.status != 200:
-            return response.status, []
-        results = json.load(response)["results"]
-        ids = [r["event_id"] for r in results]
-        sent = [e.get("event_id") for e in body["events"]] if isinstance(body, dict) else []
-        statuses = [r["status"] for r in results]
-        refused_have_errors = all(("error" in r) == (r["status"] == "refused") for r in results)
-        return (response.status if ids == sent and refused_have_errors else "bad results"), statuses
-    except socket.timeout:
-        return "timeout", []
-    except (http.client.RemoteDisconnected, ConnectionError):
-        return "closed", []
-    finally:
-        connection.close()
+    status, _, headers, data = _request(port, "/v0/events/batch", body)
+    if status == 429 and headers.get("Retry-After") != "1":
+        return "429 without Retry-After: 1", []
+    if status != 200:
+        return status, []
+    results = json.loads(data)["results"]
+    ids = [r["event_id"] for r in results]
+    sent = [e.get("event_id") for e in body["events"]] if isinstance(body, dict) else []
+    refused_have_errors = all(("error" in r) == (r["status"] == "refused") for r in results)
+    return (status if ids == sent and refused_have_errors else "bad results"), [r["status"] for r in results]
 
 
 def _batch_of(*sequences: int) -> dict[str, list[dict[str, object]]]:
@@ -221,59 +219,55 @@ def _with_collector(mode: str, check: Callable[[int, str], bool]) -> bool:
         process.wait()
 
 
+def _single_answers(port: int, mode: str) -> bool:
+    """One event at a time gets EXPECTED's and THEN's answers. Run on a fresh collector."""
+    want, least = EXPECTED[mode]
+    then = THEN.get(mode, [])
+    accepting = 202 in (want, *then)
+    failed = False
+    wrong_path, _ = _post(port, path="/v1/events")
+    no_key, _ = _post(port, key=False)
+    if accepting:
+        _post(port, event_type="client_report", sequence=1)
+    got, took = _post(port)
+    got_then = [_post(port, sequence=8 + i)[0] for i in range(len(then))]
+    if accepting:
+        _post(port, event_type="client_report", sequence=2)
+    received, _ = _received(port)
+    accepted, events, reports = received["accepted"], received["events"], received["reports"]
+    counted, _ = _received(port, "?lists=0")
+    if mode == "ok":
+        failed |= not _waits(port)
+        failed |= not _counts_once(port)
+    want_accepted = [7] if want == 202 else []
+    want_accepted += [8 + i for i, status in enumerate(then) if status == 202]
+    sent = [(e["event_type"], e["sequence_number"]) for e in events]
+    ok = (got, got_then, wrong_path, no_key, accepted, sent, reports, counted) == (
+        want,
+        then,
+        404,
+        401,
+        want_accepted,
+        [("tool_call_start", n) for n in want_accepted],
+        1 if accepting else 0,
+        {
+            "counts": {"tool_call_start": len(want_accepted)} if want_accepted else {},
+            "requests": received["requests"],
+            "reports": received["reports"],
+        },
+    ) and took >= least
+    print(f"{'ok  ' if ok else 'FAIL'} {mode}: {got} then {got_then} in {took:.2f}s, accepted {accepted}, reports {reports}")
+    return ok and not failed
+
+
 def main() -> int:
     failed = not _known_words()
     if set(EXPECTED) != set(MODES) or set(BATCH) != set(MODES):
-        print(f"FAIL this check covers {sorted(EXPECTED)}, the collector has {sorted(MODES)}")
+        print(f"FAIL this check covers {sorted(EXPECTED)} and {sorted(BATCH)}, the collector has {sorted(MODES)}")
         failed = True
-    for mode, (want, least) in EXPECTED.items():
-        process = subprocess.Popen(
-            [sys.executable, str(ROOT / "fake_collector.py"), "--mode", mode, "--delay-ms", str(DELAY_MS)],
-            stdout=subprocess.PIPE,
-            text=True,
-        )
+    for mode in EXPECTED:
         failed |= not _with_collector(mode, _batch_answers)
-        then = THEN.get(mode, [])
-        accepting = 202 in (want, *then)
-        try:
-            assert process.stdout is not None
-            port = int(process.stdout.readline())
-            wrong_path, _ = _post(port, path="/v1/events")
-            no_key, _ = _post(port, key=False)
-            if accepting:
-                _post(port, event_type="client_report", sequence=1)
-            got, took = _post(port)
-            got_then = [_post(port, sequence=8 + i)[0] for i in range(len(then))]
-            if accepting:
-                _post(port, event_type="client_report", sequence=2)
-            received, _ = _received(port)
-            accepted, events, reports = received["accepted"], received["events"], received["reports"]
-            counted, _ = _received(port, "?lists=0")
-            if mode == "ok":
-                failed |= not _waits(port)
-                failed |= not _counts_once(port)
-        finally:
-            process.kill()
-            process.wait()
-        want_accepted = [7] if want == 202 else []
-        want_accepted += [8 + i for i, status in enumerate(then) if status == 202]
-        sent = [(e["event_type"], e["sequence_number"]) for e in events]
-        ok = (got, got_then, wrong_path, no_key, accepted, sent, reports, counted) == (
-            want,
-            then,
-            404,
-            401,
-            want_accepted,
-            [("tool_call_start", n) for n in want_accepted],
-            1 if accepting else 0,
-            {
-                "counts": {"tool_call_start": len(want_accepted)} if want_accepted else {},
-                "requests": received["requests"],
-                "reports": received["reports"],
-            },
-        ) and took >= least
-        failed |= not ok
-        print(f"{'ok  ' if ok else 'FAIL'} {mode}: {got} then {got_then} in {took:.2f}s, accepted {accepted}, reports {reports}")
+        failed |= not _with_collector(mode, _single_answers)
     return 1 if failed else 0
 
 

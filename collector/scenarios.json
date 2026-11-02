@@ -1,5 +1,5 @@
 {
-  "about": "Each SDK runs every scenario against fake_collector.py with its HTTP sink, which sends in batches (SPEC §2.5) every settings.flush_interval_ms. It sends events with sequence_number 1..events, closes the sink, then checks: every write returned within limits.write_ms; close returned within settings.shutdown_budget_ms + limits.close_margin_ms; nothing raised; the collector got at least one request, except in mode 'down'; every accepted sequence number was sent, where accepted leaves out client_report events (SPEC §11.4.7), which the collector counts apart; and accepted + the SDK's drop count >= events, since an event can be both delivered and counted but never neither. 'expect' pins exact numbers where the mode makes them certain; 'requests' is how many POSTs the collector got. Where 'expect' has 'reports', the runner, not the SDK, first waits for the collector to have the expected accepted and reports, with GET /_received?accepted=A&reports=R&wait_ms=limits.report_ms, since close stops reports. The collector counts only reports that come after it accepted an event, since SPEC §11.4.7 sends one only after a delivery. Mode 'down' starts no collector: the SDK sends to port 1 on 127.0.0.1, where nothing listens.",
+  "about": "Each SDK runs every scenario against fake_collector.py with its HTTP sink, which sends in batches (SPEC §2.5) every settings.flush_interval_ms. It sends events with sequence_number 1..events, closes the sink, then checks: every write returned within limits.write_ms; close returned within settings.shutdown_budget_ms + limits.close_margin_ms; nothing raised; the collector got at least one request, except in mode 'down'; every accepted sequence number was sent, where accepted leaves out client_report events (SPEC §11.4.7), which the collector counts apart; and accepted + the SDK's drop count >= events, since an event can be both delivered and counted but never neither. 'expect' pins exact numbers where the mode makes them certain; 'requests' is how many POSTs the collector got: 101 events are a batch of 100 and one more, and a 429 asking for a wait gets nothing more before close. Where 'expect' has 'reports', the runner, not the SDK, first waits for the collector to have the expected accepted and reports, with GET /_received?accepted=A&reports=R&wait_ms=limits.report_ms, since close stops reports. The collector counts only reports that come after it accepted an event, since SPEC §11.4.7 sends one only after a delivery. Mode 'down' starts no collector: the SDK sends to port 1 on 127.0.0.1, where nothing listens.",
   "settings": {
     "request_timeout_ms": 200,
     "shutdown_budget_ms": 500,
@@ -20,6 +20,16 @@
         "accepted": 5,
         "dropped": 0,
         "requests": 1
+      }
+    },
+    {
+      "name": "full_batch",
+      "mode": "ok",
+      "events": 101,
+      "expect": {
+        "accepted": 101,
+        "dropped": 0,
+        "requests": 2
       }
     },
     {
@@ -47,7 +57,8 @@
       "events": 3,
       "expect": {
         "accepted": 0,
-        "dropped": 3
+        "dropped": 3,
+        "requests": 1
       }
     },
     {

@@ -7,15 +7,16 @@ Prints the port it listens on as the first line of stdout. ``POST
 answer by mode; any other POST gets 404 or 401. ``GET /_received`` returns
 the sequence numbers it accepted, every event it accepted in the order it
 came (a resent event_id once), how many it accepted of each event type (a
-resent sequence number counted once), how many requests it got, and how many
-``client_report`` events it accepted after an event, which are kept apart
-from the events. With ``?accepted=N&reports=M&wait_ms=T`` it first waits up
-to T ms until it has that many of each. ``?lists=0`` leaves out the sequence
-numbers and the events. ``refuse_first`` refuses the first event and accepts
-the rest. ``no_batch`` is a collector without the batch endpoint. ``split``
-answers 413 to a batch of more than 2 events, and ``413`` to every request.
-Standard library only, so any SDK's CI can run it. Stop it by killing the
-process: a ``hang`` request never ends on its own.
+resent event once, by event_id or else sequence number), how many requests it
+got, and how many ``client_report`` events it accepted after an event, which
+are kept apart from the events. With ``?accepted=N&reports=M&wait_ms=T`` it
+first waits up to T ms until it has that many of each. ``?lists=0`` leaves
+out the sequence numbers and the events. ``refuse_first`` refuses the first
+event and accepts the rest. ``no_batch`` is a collector without the batch
+endpoint. ``split`` answers 413 to a batch of more than 2 events, and ``413``
+to every request. Standard library only, so any SDK's CI can run it. Stop it
+by killing the process: a ``hang`` request never ends on its own. ``429``
+asks for a 1 s wait with ``Retry-After``.
 """
 
 from __future__ import annotations
@@ -82,7 +83,8 @@ class _Handler(BaseHTTPRequestHandler):
         body = self.rfile.read(int(self.headers.get("Content-Length") or 0))
         mode = self.server.mode
         batch = self.path == "/v0/events/batch"
-        if self.path != "/v0/events" and not (batch and mode != "no_batch"):
+        known = self.path == "/v0/events" or (batch and mode != "no_batch")
+        if not known:
             self._answer(404)
             return
         if not (self.headers.get("Authorization") or "").startswith("Bearer "):
@@ -95,7 +97,10 @@ class _Handler(BaseHTTPRequestHandler):
         if mode == "disconnect":
             self.close_connection = True
             return
-        if mode in ("500", "429", "400", "413"):
+        if mode == "429":
+            self._answer(429, headers={"Retry-After": "1"})
+            return
+        if mode in ("500", "400", "413"):
             self._answer(int(mode))
             return
         if mode == "slow":
@@ -105,8 +110,8 @@ class _Handler(BaseHTTPRequestHandler):
             events = parsed["events"] if batch else [parsed]
             if not isinstance(events, list) or not 0 < len(events) <= BATCH_CAP:
                 raise ValueError
-            for event in events:
-                event["sequence_number"]
+            if not all(isinstance(e, dict) and "sequence_number" in e for e in events):
+                raise ValueError
         except (ValueError, KeyError, TypeError):
             self._answer(400)
             return
@@ -145,14 +150,16 @@ class _Handler(BaseHTTPRequestHandler):
                 return "duplicate"
             server.event_ids.add(event_id)
         sequence = event["sequence_number"]
-        if sequence not in server.accepted:
+        if event_id is not None or sequence not in server.accepted:
             server.counts[str(event.get("event_type"))] += 1
         server.accepted.add(sequence)
         server.events.append(event)
         return "accepted"
 
-    def _answer(self, status: int, body: bytes = b"") -> None:
+    def _answer(self, status: int, body: bytes = b"", headers: dict[str, str] | None = None) -> None:
         self.send_response(status)
+        for name, value in (headers or {}).items():
+            self.send_header(name, value)
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
