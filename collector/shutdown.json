@@ -1,0 +1,47 @@
+{
+  "about": "SPEC §11.2 rule 7, shutdown. Each SDK runs every scenario through its MCP install path: a server with one tool, 'echo', which returns its 'text' argument; Baton installed on it with an HTTP sink sending to fake_collector.py in the scenario's mode, with 'settings'; and a client in the same process. The steps run in order. 'call': N calls of echo, one after another; each must return its text within limits.call_ms, whatever the collector does. 'flush' and 'close': the install handle's flush and close; each must return within settings.shutdown_budget_ms + limits.close_margin_ms and never raise. 'close_twice': two closes at once; once the second returns, the next step runs, while the first may still be running. 'check': reads the collector at once, with no wait, and counts the tool_call_start and tool_call_end events it accepted, which must equal 'tool_events'. After the last step, 'expect.dropped' says which drop reasons (SPEC §11.2 rule 8) grew during the scenario and by at least how much; any reason not named must not grow. Where 'expect.warnings_after_close' is set, the SDK must warn exactly that many times between the first close returning and the end. A warning is a Python warnings.warn or a 'baton' log record at WARNING or above, a TS process.emitWarning or line on stderr, or a Go slog record at Warn or above. Not covered here: a close re-entered from inside the first, and the exit flush, since Go has no exit hook. An SDK lists the scenarios it does not run, with the reason, in its own runner.",
+  "settings": {
+    "request_timeout_ms": 200,
+    "shutdown_budget_ms": 2000,
+    "backoff_base_ms": 1
+  },
+  "limits": {
+    "call_ms": 2000,
+    "close_margin_ms": 1000
+  },
+  "scenarios": [
+    {
+      "name": "close_sends_what_is_queued",
+      "mode": "slow",
+      "delay_ms": 100,
+      "steps": [{"call": 3}, {"close": {}}, {"check": {"tool_events": 6}}],
+      "expect": {"dropped": {}}
+    },
+    {
+      "name": "second_close_waits_for_the_first",
+      "mode": "slow",
+      "delay_ms": 100,
+      "steps": [{"call": 3}, {"close_twice": {}}, {"check": {"tool_events": 6}}],
+      "expect": {"dropped": {}}
+    },
+    {
+      "name": "flush_waits_for_what_is_queued",
+      "mode": "slow",
+      "delay_ms": 100,
+      "steps": [{"call": 3}, {"flush": {}}, {"check": {"tool_events": 6}}, {"close": {}}],
+      "expect": {"dropped": {}}
+    },
+    {
+      "name": "a_call_after_close_is_dropped_and_counted",
+      "mode": "ok",
+      "steps": [{"call": 1}, {"close": {}}, {"check": {"tool_events": 2}}, {"call": 2}, {"close": {}}, {"check": {"tool_events": 2}}],
+      "expect": {"dropped": {"after_close": 4}, "warnings_after_close": 1}
+    },
+    {
+      "name": "a_hung_collector_neither_slows_a_call_nor_holds_close",
+      "mode": "hang",
+      "steps": [{"call": 3}, {"close": {}}],
+      "expect": {"dropped": {"unsent_at_close": 6}}
+    }
+  ]
+}

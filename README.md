@@ -30,6 +30,11 @@ producer owns this repo; it's the neutral thing they all agree with.
   limit, nothing raises, every event is delivered or counted, and a loss is
   reported in one `client_report` once events get through. Python 3,
   standard library only.
+- `collector/shutdown.json` — shutdown scenarios (SPEC §11.2 rule 7) each
+  SDK runs through its MCP install path against the same collector: close
+  and flush send what is queued, a second close waits for the first, a call
+  after close is dropped and counted with one warning, and a hung collector
+  neither slows a call nor holds close.
 
 ## Using this from a producer repo
 

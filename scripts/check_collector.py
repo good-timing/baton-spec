@@ -1,5 +1,6 @@
-"""Self-check: each fake_collector.py mode answers as scenarios.json assumes,
-and every mode scenarios.json uses is one the collector has."""
+"""Self-check: each fake_collector.py mode answers as scenarios.json and
+shutdown.json assume, and every mode and step they use is one the collector
+and the runners know."""
 
 from __future__ import annotations
 
@@ -56,11 +57,16 @@ def _post(
 
 
 def _received(port: int, query: str = "") -> tuple[list[int], int, float]:
+    accepted, _, reports, took = _received_events(port, query)
+    return accepted, reports, took
+
+
+def _received_events(port: int, query: str = "") -> tuple[list[int], list[dict[str, object]], int, float]:
     connection = http.client.HTTPConnection("127.0.0.1", port, timeout=3)
     started = time.monotonic()
     connection.request("GET", f"/_received{query}")
     received = json.load(connection.getresponse())
-    return received["accepted"], received["reports"], time.monotonic() - started
+    return received["accepted"], received["events"], received["reports"], time.monotonic() - started
 
 
 def _woken(port: int, query: str, then: Callable[[], object]) -> float:
@@ -105,12 +111,29 @@ def _waits(port: int) -> bool:
     return ok
 
 
+STEPS = {"call", "flush", "close", "close_twice", "check"}
+REASONS = {"buffer_full", "refused", "encode_failed", "write_failed", "after_close", "unsent_at_close"}
+
+
+def _known_words() -> bool:
+    ok = True
+    for name in ("scenarios.json", "shutdown.json"):
+        scenarios = json.loads((ROOT / name).read_text())["scenarios"]
+        if unknown := {s["mode"] for s in scenarios} - set(MODES) - {"down"}:
+            print(f"FAIL {name} uses modes the collector lacks: {sorted(unknown)}")
+            ok = False
+    shutdown = json.loads((ROOT / "shutdown.json").read_text())["scenarios"]
+    if unknown := {key for s in shutdown for step in s["steps"] for key in step} - STEPS:
+        print(f"FAIL shutdown.json uses steps the runners lack: {sorted(unknown)}")
+        ok = False
+    if unknown := {reason for s in shutdown for reason in s["expect"]["dropped"]} - REASONS:
+        print(f"FAIL shutdown.json names drop reasons SPEC lacks: {sorted(unknown)}")
+        ok = False
+    return ok
+
+
 def main() -> int:
-    failed = False
-    scenario_modes = {s["mode"] for s in json.loads((ROOT / "scenarios.json").read_text())["scenarios"]}
-    if unknown := scenario_modes - set(MODES) - {"down"}:
-        print(f"FAIL scenarios.json uses modes the collector lacks: {sorted(unknown)}")
-        failed = True
+    failed = not _known_words()
     if set(EXPECTED) != set(MODES):
         print(f"FAIL this check covers {sorted(EXPECTED)}, the collector has {sorted(MODES)}")
         failed = True
@@ -133,7 +156,7 @@ def main() -> int:
             got_then = [_post(port, sequence=8 + i)[0] for i in range(len(then))]
             if accepting:
                 _post(port, event_type="client_report", sequence=2)
-            accepted, reports, _ = _received(port)
+            accepted, events, reports, _ = _received_events(port)
             if mode == "ok":
                 failed |= not _waits(port)
         finally:
@@ -141,12 +164,14 @@ def main() -> int:
             process.wait()
         want_accepted = [7] if want == 202 else []
         want_accepted += [8 + i for i, status in enumerate(then) if status == 202]
-        ok = (got, got_then, wrong_path, no_key, accepted, reports) == (
+        sent = [(e["event_type"], e["sequence_number"]) for e in events]
+        ok = (got, got_then, wrong_path, no_key, accepted, sent, reports) == (
             want,
             then,
             404,
             401,
             want_accepted,
+            [("tool_call_start", n) for n in want_accepted],
             1 if accepting else 0,
         ) and took >= least
         failed |= not ok

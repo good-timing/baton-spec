@@ -4,9 +4,9 @@
 
 Prints the port it listens on as the first line of stdout. ``POST
 /v0/events`` with a bearer key answers by mode; any other POST gets 404 or
-401. ``GET /_received`` returns the sequence numbers it accepted, how many
-requests it got, and how many ``client_report`` events it accepted after an
-event, which are kept apart from the events. With ``?accepted=N&reports=M&wait_ms=T``
+401. ``GET /_received`` returns the sequence numbers it accepted, the accepted
+events themselves, how many requests it got, and how many ``client_report``
+events it accepted after an event, which are kept apart from the events. With ``?accepted=N&reports=M&wait_ms=T``
 it first waits up to T ms until it has that many of each. ``refuse_first``
 answers the first event 400 and the rest as ``ok``. Standard library only, so
 any SDK's CI can run it. Stop it by killing the process: a ``hang`` request
@@ -33,6 +33,7 @@ class _Collector(ThreadingHTTPServer):
         self.mode = mode
         self.delay = delay_ms / 1000
         self.accepted: set[int] = set()
+        self.events: list[dict[str, object]] = []
         self.requests = 0
         self.reports = 0
         self.refused_first = False
@@ -60,6 +61,7 @@ class _Handler(BaseHTTPRequestHandler):
             )
             body = {
                 "accepted": sorted(self.server.accepted),
+                "events": self.server.events,
                 "requests": self.server.requests,
                 "reports": self.server.reports,
             }
@@ -104,6 +106,7 @@ class _Handler(BaseHTTPRequestHandler):
                     self.server.reports += 1
                 elif not report:
                     self.server.accepted.add(sequence)
+                    self.server.events.append(event)
                 self.server.changed.notify_all()
         self._answer(400 if refused else 202)
 
