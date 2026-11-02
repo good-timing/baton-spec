@@ -30,6 +30,23 @@ EXPECTED: dict[str, tuple[int | str, float]] = {
     "hang": ("timeout", 0.5),
     "disconnect": ("closed", 0),
     "refuse_first": (400, 0),
+    "no_batch": (202, 0),
+    "split": (202, 0),
+    "413": (413, 0),
+}
+# What a batch of three events gets: a status, and each event's result on a 200.
+BATCH: dict[str, tuple[int | str, list[str]]] = {
+    "ok": (200, ["accepted"] * 3),
+    "slow": (200, ["accepted"] * 3),
+    "500": (500, []),
+    "429": (429, []),
+    "400": (400, []),
+    "hang": ("timeout", []),
+    "disconnect": ("closed", []),
+    "refuse_first": (200, ["refused", "accepted", "accepted"]),
+    "no_batch": (404, []),
+    "split": (413, []),
+    "413": (413, []),
 }
 # What the next events get, for a mode whose answer changes.
 THEN: dict[str, list[int]] = {"refuse_first": [202, 202]}
@@ -55,6 +72,53 @@ def _post(
         return "closed", time.monotonic() - started
     finally:
         connection.close()
+
+
+def _post_batch(port: int, body: object) -> tuple[int | str, list[str]]:
+    """A batch's status, and each event's result on a 200."""
+    connection = http.client.HTTPConnection("127.0.0.1", port, timeout=0.5)
+    try:
+        connection.request("POST", "/v0/events/batch", json.dumps(body), {"Authorization": "Bearer k"})
+        response = connection.getresponse()
+        if response.status != 200:
+            return response.status, []
+        results = json.load(response)["results"]
+        ids = [r["event_id"] for r in results]
+        sent = [e.get("event_id") for e in body["events"]] if isinstance(body, dict) else []
+        statuses = [r["status"] for r in results]
+        refused_have_errors = all(("error" in r) == (r["status"] == "refused") for r in results)
+        return (response.status if ids == sent and refused_have_errors else "bad results"), statuses
+    except socket.timeout:
+        return "timeout", []
+    except (http.client.RemoteDisconnected, ConnectionError):
+        return "closed", []
+    finally:
+        connection.close()
+
+
+def _batch_of(*sequences: int) -> dict[str, list[dict[str, object]]]:
+    return {"events": [{"event_type": "tool_call_start", "sequence_number": n, "event_id": f"e{n}"} for n in sequences]}
+
+
+def _batch_answers(port: int, mode: str) -> bool:
+    """A batch gets BATCH's answer, a resent event is a duplicate, and a bad
+    batch is refused. Run on a fresh collector."""
+    want = BATCH[mode]
+    got = _post_batch(port, _batch_of(20, 21, 22))
+    ok = got == want
+    extra = ""
+    if mode == "ok":
+        resent = _post_batch(port, _batch_of(22, 23))
+        bad = [_post_batch(port, body)[0] for body in ({"events": []}, _batch_of(*range(101)), [1], {"events": [{}]})]
+        shared = _post_batch(port, {"events": [{"event_type": "tool_call_start", "sequence_number": 40, "event_id": i} for i in ("a", "b")]})
+        ok = ok and resent == (200, ["duplicate", "accepted"]) and shared == (200, ["accepted"] * 2) and bad == [400] * 4
+        extra = f", resent {resent}, two sessions' sequence 40 {shared}, bad {bad}"
+    if mode == "split":
+        two = _post_batch(port, _batch_of(30, 31))
+        ok = ok and two == (200, ["accepted"] * 2)
+        extra = f", two events {two}"
+    print(f"{'ok  ' if ok else 'FAIL'} {mode} batch: {got}{extra}")
+    return ok
 
 
 def _received(port: int, query: str = "") -> tuple[dict[str, Any], float]:
@@ -143,9 +207,23 @@ def _known_words() -> bool:
     return ok
 
 
+def _with_collector(mode: str, check: Callable[[int, str], bool]) -> bool:
+    process = subprocess.Popen(
+        [sys.executable, str(ROOT / "fake_collector.py"), "--mode", mode, "--delay-ms", str(DELAY_MS)],
+        stdout=subprocess.PIPE,
+        text=True,
+    )
+    try:
+        assert process.stdout is not None
+        return check(int(process.stdout.readline()), mode)
+    finally:
+        process.kill()
+        process.wait()
+
+
 def main() -> int:
     failed = not _known_words()
-    if set(EXPECTED) != set(MODES):
+    if set(EXPECTED) != set(MODES) or set(BATCH) != set(MODES):
         print(f"FAIL this check covers {sorted(EXPECTED)}, the collector has {sorted(MODES)}")
         failed = True
     for mode, (want, least) in EXPECTED.items():
@@ -154,6 +232,7 @@ def main() -> int:
             stdout=subprocess.PIPE,
             text=True,
         )
+        failed |= not _with_collector(mode, _batch_answers)
         then = THEN.get(mode, [])
         accepting = 202 in (want, *then)
         try:

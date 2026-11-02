@@ -24,11 +24,13 @@ producer owns this repo; it's the neutral thing they all agree with.
   The last cases hold one key each, so a producer that lowercases a key
   differently, such as one with U+0130 (`İ`), fails one of them.
 - `collector/fake_collector.py` and `collector/scenarios.json` — a collector
-  that fails on purpose (slow, 500, 429, 400, hang, disconnect, or a 400 for
-  the first event only), and the scenarios each SDK runs its HTTP sink
-  through. The checks are yes or no: writes never block, close keeps its
-  limit, nothing raises, every event is delivered or counted, and a loss is
-  reported in one `client_report` once events get through. Python 3,
+  that fails on purpose (slow, 500, 429, 400, hang, disconnect, a refusal of
+  the first event only, no batch endpoint, or a 413), and the scenarios each
+  SDK runs its HTTP sink through. It takes single events and batches (SPEC
+  §2.5). The checks are yes or no: writes never block, close keeps its limit,
+  nothing raises, every event is delivered or counted, a loss is reported in
+  one `client_report` once events get through, and five events go in one
+  request. Python 3,
   standard library only.
 - `collector/shutdown.json` — shutdown scenarios (SPEC §11.2 rule 7) each
   SDK runs through its MCP install path against the same collector: close

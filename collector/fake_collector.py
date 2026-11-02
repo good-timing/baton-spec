@@ -3,16 +3,19 @@
     python fake_collector.py --mode MODE [--delay-ms N]
 
 Prints the port it listens on as the first line of stdout. ``POST
-/v0/events`` with a bearer key answers by mode; any other POST gets 404 or
-401. ``GET /_received`` returns the sequence numbers it accepted, every event
-it accepted in the order it came, how many it accepted of each event type
-(a resent sequence number counted once), how many requests it got, and how
-many ``client_report`` events it accepted after an event, which are kept
-apart from the events. With ``?accepted=N&reports=M&wait_ms=T`` it first
-waits up to T ms until it has that many of each. ``?lists=0`` leaves out the
-sequence numbers and the events. ``refuse_first`` answers the first event
-400 and the rest as ``ok``. Standard library only, so any SDK's CI can run
-it. Stop it by killing the process: a ``hang`` request never ends on its own.
+/v0/events`` and ``POST /v0/events/batch`` (SPEC §2.5) with a bearer key
+answer by mode; any other POST gets 404 or 401. ``GET /_received`` returns
+the sequence numbers it accepted, every event it accepted in the order it
+came (a resent event_id once), how many it accepted of each event type (a
+resent sequence number counted once), how many requests it got, and how many
+``client_report`` events it accepted after an event, which are kept apart
+from the events. With ``?accepted=N&reports=M&wait_ms=T`` it first waits up
+to T ms until it has that many of each. ``?lists=0`` leaves out the sequence
+numbers and the events. ``refuse_first`` refuses the first event and accepts
+the rest. ``no_batch`` is a collector without the batch endpoint. ``split``
+answers 413 to a batch of more than 2 events, and ``413`` to every request.
+Standard library only, so any SDK's CI can run it. Stop it by killing the
+process: a ``hang`` request never ends on its own.
 """
 
 from __future__ import annotations
@@ -25,7 +28,8 @@ from collections import Counter
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 
-MODES = ("ok", "slow", "500", "429", "400", "hang", "disconnect", "refuse_first")
+MODES = ("ok", "slow", "500", "429", "400", "hang", "disconnect", "refuse_first", "no_batch", "split", "413")
+BATCH_CAP = 100
 
 
 class _Collector(ThreadingHTTPServer):
@@ -36,6 +40,7 @@ class _Collector(ThreadingHTTPServer):
         self.mode = mode
         self.delay = delay_ms / 1000
         self.accepted: set[int] = set()
+        self.event_ids: set[object] = set()
         self.events: list[dict[str, object]] = []
         self.counts: Counter[str] = Counter()
         self.requests = 0
@@ -75,7 +80,9 @@ class _Handler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         body = self.rfile.read(int(self.headers.get("Content-Length") or 0))
-        if self.path != "/v0/events":
+        mode = self.server.mode
+        batch = self.path == "/v0/events/batch"
+        if self.path != "/v0/events" and not (batch and mode != "no_batch"):
             self._answer(404)
             return
         if not (self.headers.get("Authorization") or "").startswith("Bearer "):
@@ -83,40 +90,66 @@ class _Handler(BaseHTTPRequestHandler):
             return
         with self.server.changed:
             self.server.requests += 1
-        mode = self.server.mode
         if mode == "hang":
             threading.Event().wait()
         if mode == "disconnect":
             self.close_connection = True
             return
-        if mode in ("500", "429", "400"):
+        if mode in ("500", "429", "400", "413"):
             self._answer(int(mode))
             return
         if mode == "slow":
             time.sleep(self.server.delay)
         try:
-            event = json.loads(body)
-            sequence = event["sequence_number"]
+            parsed = json.loads(body)
+            events = parsed["events"] if batch else [parsed]
+            if not isinstance(events, list) or not 0 < len(events) <= BATCH_CAP:
+                raise ValueError
+            for event in events:
+                event["sequence_number"]
         except (ValueError, KeyError, TypeError):
             self._answer(400)
             return
-        report = event.get("event_type") == "client_report"
+        if batch and mode == "split" and len(events) > 2:
+            self._answer(413)
+            return
         with self.server.changed:
-            if mode == "refuse_first" and not report and not self.server.refused_first:
-                self.server.refused_first = True
-                refused = True
-            else:
-                refused = False
-                # A report sent before any delivery breaks SPEC §11.4.7, so it is not counted.
-                if report and self.server.accepted:
-                    self.server.reports += 1
-                elif not report:
-                    if sequence not in self.server.accepted:
-                        self.server.counts[str(event.get("event_type"))] += 1
-                    self.server.accepted.add(sequence)
-                    self.server.events.append(event)
-                self.server.changed.notify_all()
-        self._answer(400 if refused else 202)
+            statuses = [self._take(event) for event in events]
+            self.server.changed.notify_all()
+        if not batch:
+            self._answer(400 if statuses[0] == "refused" else 202)
+            return
+        results = [
+            {"event_id": event.get("event_id"), "status": status}
+            | ({"error": {"code": "payload_malformed", "message": "refused on purpose"}} if status == "refused" else {})
+            for event, status in zip(events, statuses)
+        ]
+        self._answer(200, json.dumps({"results": results}).encode())
+
+    def _take(self, event: dict[str, object]) -> str:
+        """Accept, or refuse in mode ``refuse_first``, one event. Call holding ``changed``."""
+        server = self.server
+        report = event.get("event_type") == "client_report"
+        if server.mode == "refuse_first" and not report and not server.refused_first:
+            server.refused_first = True
+            return "refused"
+        # A report sent before any delivery breaks SPEC §11.4.7, so it is not counted.
+        if report:
+            if server.accepted:
+                server.reports += 1
+            return "accepted"
+        # Sessions share sequence numbers, so only event_id marks a resend (SPEC §2.4).
+        event_id = event.get("event_id")
+        if event_id is not None:
+            if event_id in server.event_ids:
+                return "duplicate"
+            server.event_ids.add(event_id)
+        sequence = event["sequence_number"]
+        if sequence not in server.accepted:
+            server.counts[str(event.get("event_type"))] += 1
+        server.accepted.add(sequence)
+        server.events.append(event)
+        return "accepted"
 
     def _answer(self, status: int, body: bytes = b"") -> None:
         self.send_response(status)
