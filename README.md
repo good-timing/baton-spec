@@ -24,10 +24,12 @@ producer owns this repo; it's the neutral thing they all agree with.
   The last cases hold one key each, so a producer that lowercases a key
   differently, such as one with U+0130 (`İ`), fails one of them.
 - `collector/fake_collector.py` and `collector/scenarios.json` — a collector
-  that fails on purpose (slow, 500, 429, 400, hang, disconnect), and the
-  scenarios each SDK runs its HTTP sink through. The checks are yes or no:
-  writes never block, close keeps its limit, nothing raises, and every event
-  is delivered or counted. Python 3, standard library only.
+  that fails on purpose (slow, 500, 429, 400, hang, disconnect, or a 400 for
+  the first event only), and the scenarios each SDK runs its HTTP sink
+  through. The checks are yes or no: writes never block, close keeps its
+  limit, nothing raises, every event is delivered or counted, and a loss is
+  reported in one `client_report` once events get through. Python 3,
+  standard library only.
 
 ## Using this from a producer repo
 

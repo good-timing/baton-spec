@@ -8,7 +8,9 @@ import json
 import socket
 import subprocess
 import sys
+import threading
 import time
+from collections.abc import Callable
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent / "collector"
@@ -25,17 +27,24 @@ EXPECTED: dict[str, tuple[int | str, float]] = {
     "400": (400, 0),
     "hang": ("timeout", 0.5),
     "disconnect": ("closed", 0),
+    "refuse_first": (400, 0),
 }
+# What the next events get, for a mode whose answer changes.
+THEN: dict[str, list[int]] = {"refuse_first": [202, 202]}
 
 
 def _post(
-    port: int, path: str = "/v0/events", key: bool = True, event_type: str = "tool_call_start"
+    port: int,
+    path: str = "/v0/events",
+    key: bool = True,
+    event_type: str = "tool_call_start",
+    sequence: int = 7,
 ) -> tuple[int | str, float]:
     connection = http.client.HTTPConnection("127.0.0.1", port, timeout=0.5)
     headers = {"Authorization": "Bearer k"} if key else {}
     started = time.monotonic()
     try:
-        body = {"event_type": event_type, "sequence_number": 7}
+        body = {"event_type": event_type, "sequence_number": sequence}
         connection.request("POST", path, json.dumps(body), headers)
         return connection.getresponse().status, time.monotonic() - started
     except socket.timeout:
@@ -46,11 +55,54 @@ def _post(
         connection.close()
 
 
-def _received(port: int) -> tuple[list[int], int]:
-    connection = http.client.HTTPConnection("127.0.0.1", port, timeout=1)
-    connection.request("GET", "/_received")
+def _received(port: int, query: str = "") -> tuple[list[int], int, float]:
+    connection = http.client.HTTPConnection("127.0.0.1", port, timeout=3)
+    started = time.monotonic()
+    connection.request("GET", f"/_received{query}")
     received = json.load(connection.getresponse())
-    return received["accepted"], received["reports"]
+    return received["accepted"], received["reports"], time.monotonic() - started
+
+
+def _woken(port: int, query: str, then: Callable[[], object]) -> float:
+    """How long a GET waiting on ``query`` takes when ``then`` runs 0.1s in."""
+    took: list[float] = []
+
+    def wait() -> None:
+        try:
+            took.append(_received(port, query)[2])
+        except OSError:
+            pass
+
+    waiter = threading.Thread(target=wait)
+    waiter.start()
+    time.sleep(0.1)
+    then()
+    waiter.join()
+    return took[0] if took else float("inf")
+
+
+def _waits(port: int) -> bool:
+    """``/_received`` waits for the events and reports it is asked for, and no longer.
+    Run after one event and one report were accepted."""
+    _, _, unmet = _received(port, "?accepted=9&wait_ms=300")
+    _, _, met = _received(port, "?accepted=1&reports=1&wait_ms=2000")
+    by_event = _woken(port, "?accepted=2&wait_ms=2000", lambda: _post(port, sequence=8))
+    by_report = _woken(
+        port, "?reports=2&wait_ms=2000", lambda: _post(port, event_type="client_report", sequence=3)
+    )
+    bad = http.client.HTTPConnection("127.0.0.1", port, timeout=1)
+    try:
+        bad.request("GET", "/_received?wait_ms=soon")
+        bad_query: int | str = bad.getresponse().status
+    except (http.client.HTTPException, OSError):
+        bad_query = "closed"
+    woken = [by_event, by_report]
+    ok = unmet >= 0.3 and met < 1 and all(0.1 <= t < 1.5 for t in woken) and bad_query == 400
+    print(
+        f"{'ok  ' if ok else 'FAIL'} wait: unmet {unmet:.2f}s, met {met:.2f}s,"
+        f" woken by an event {by_event:.2f}s, by a report {by_report:.2f}s, bad query {bad_query}"
+    )
+    return ok
 
 
 def main() -> int:
@@ -68,28 +120,37 @@ def main() -> int:
             stdout=subprocess.PIPE,
             text=True,
         )
+        then = THEN.get(mode, [])
+        accepting = 202 in (want, *then)
         try:
             assert process.stdout is not None
             port = int(process.stdout.readline())
             wrong_path, _ = _post(port, path="/v1/events")
             no_key, _ = _post(port, key=False)
+            if accepting:
+                _post(port, event_type="client_report", sequence=1)
             got, took = _post(port)
-            if want == 202:
-                _post(port, event_type="client_report")
-            accepted, reports = _received(port)
+            got_then = [_post(port, sequence=8 + i)[0] for i in range(len(then))]
+            if accepting:
+                _post(port, event_type="client_report", sequence=2)
+            accepted, reports, _ = _received(port)
+            if mode == "ok":
+                failed |= not _waits(port)
         finally:
             process.kill()
             process.wait()
-        want_accepted, want_reports = ([7], 1) if want == 202 else ([], 0)
-        ok = (got, wrong_path, no_key, accepted, reports) == (
+        want_accepted = [7] if want == 202 else []
+        want_accepted += [8 + i for i, status in enumerate(then) if status == 202]
+        ok = (got, got_then, wrong_path, no_key, accepted, reports) == (
             want,
+            then,
             404,
             401,
             want_accepted,
-            want_reports,
+            1 if accepting else 0,
         ) and took >= least
         failed |= not ok
-        print(f"{'ok  ' if ok else 'FAIL'} {mode}: {got} in {took:.2f}s, accepted {accepted}, reports {reports}")
+        print(f"{'ok  ' if ok else 'FAIL'} {mode}: {got} then {got_then} in {took:.2f}s, accepted {accepted}, reports {reports}")
     return 1 if failed else 0
 
 

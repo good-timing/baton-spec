@@ -5,9 +5,12 @@
 Prints the port it listens on as the first line of stdout. ``POST
 /v0/events`` with a bearer key answers by mode; any other POST gets 404 or
 401. ``GET /_received`` returns the sequence numbers it accepted, how many
-requests it got, and how many ``client_report`` events it accepted, which
-are kept apart from the events. Standard library only, so any SDK's CI can run it.
-Stop it by killing the process: a ``hang`` request never ends on its own.
+requests it got, and how many ``client_report`` events it accepted after an
+event, which are kept apart from the events. With ``?accepted=N&reports=M&wait_ms=T``
+it first waits up to T ms until it has that many of each. ``refuse_first``
+answers the first event 400 and the rest as ``ok``. Standard library only, so
+any SDK's CI can run it. Stop it by killing the process: a ``hang`` request
+never ends on its own.
 """
 
 from __future__ import annotations
@@ -17,8 +20,9 @@ import json
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import parse_qs, urlsplit
 
-MODES = ("ok", "slow", "500", "429", "400", "hang", "disconnect")
+MODES = ("ok", "slow", "500", "429", "400", "hang", "disconnect", "refuse_first")
 
 
 class _Collector(ThreadingHTTPServer):
@@ -31,17 +35,29 @@ class _Collector(ThreadingHTTPServer):
         self.accepted: set[int] = set()
         self.requests = 0
         self.reports = 0
-        self.lock = threading.Lock()
+        self.refused_first = False
+        self.changed = threading.Condition()
 
 
 class _Handler(BaseHTTPRequestHandler):
     server: _Collector
 
     def do_GET(self) -> None:
-        if self.path != "/_received":
+        url = urlsplit(self.path)
+        if url.path != "/_received":
             self._answer(404)
             return
-        with self.server.lock:
+        try:
+            query = {k: int(v[0]) for k, v in parse_qs(url.query).items()}
+        except ValueError:
+            self._answer(400)
+            return
+        with self.server.changed:
+            self.server.changed.wait_for(
+                lambda: len(self.server.accepted) >= query.get("accepted", 0)
+                and self.server.reports >= query.get("reports", 0),
+                timeout=query.get("wait_ms", 0) / 1000,
+            )
             body = {
                 "accepted": sorted(self.server.accepted),
                 "requests": self.server.requests,
@@ -57,7 +73,7 @@ class _Handler(BaseHTTPRequestHandler):
         if not (self.headers.get("Authorization") or "").startswith("Bearer "):
             self._answer(401)
             return
-        with self.server.lock:
+        with self.server.changed:
             self.server.requests += 1
         mode = self.server.mode
         if mode == "hang":
@@ -76,12 +92,20 @@ class _Handler(BaseHTTPRequestHandler):
         except (ValueError, KeyError, TypeError):
             self._answer(400)
             return
-        with self.server.lock:
-            if event.get("event_type") == "client_report":
-                self.server.reports += 1
+        report = event.get("event_type") == "client_report"
+        with self.server.changed:
+            if mode == "refuse_first" and not report and not self.server.refused_first:
+                self.server.refused_first = True
+                refused = True
             else:
-                self.server.accepted.add(sequence)
-        self._answer(202)
+                refused = False
+                # A report sent before any delivery breaks SPEC §11.4.7, so it is not counted.
+                if report and self.server.accepted:
+                    self.server.reports += 1
+                elif not report:
+                    self.server.accepted.add(sequence)
+                self.server.changed.notify_all()
+        self._answer(400 if refused else 202)
 
     def _answer(self, status: int, body: bytes = b"") -> None:
         self.send_response(status)
