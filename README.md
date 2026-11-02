@@ -35,6 +35,8 @@ producer owns this repo; it's the neutral thing they all agree with.
   and flush send what is queued, a second close waits for the first, a call
   after close is dropped and counted with one warning, and a hung collector
   neither slows a call nor holds close.
+- `collector/sessions.json` — how the session ids group (SPEC §3.4) over
+  the in-process transport, stateful and stateless streamable HTTP.
 
 ## Using this from a producer repo
 

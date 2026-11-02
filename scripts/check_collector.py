@@ -1,6 +1,6 @@
 """Self-check: each fake_collector.py mode answers as scenarios.json and
-shutdown.json assume, and every mode and step they use is one the collector
-and the runners know."""
+shutdown.json assume, and every mode, step, transport and grouping the
+scenario files use is one the collector and the runners know."""
 
 from __future__ import annotations
 
@@ -112,6 +112,8 @@ def _waits(port: int) -> bool:
 
 
 STEPS = {"call", "flush", "close", "close_twice", "check"}
+TRANSPORTS = {"memory", "stateful_http", "stateless_http"}
+GROUPINGS = {"one", "per_client", "per_call"}
 REASONS = {"buffer_full", "refused", "encode_failed", "write_failed", "after_close", "unsent_at_close"}
 
 
@@ -128,6 +130,13 @@ def _known_words() -> bool:
         ok = False
     if unknown := {reason for s in shutdown for reason in s["expect"]["dropped"]} - REASONS:
         print(f"FAIL shutdown.json names drop reasons SPEC lacks: {sorted(unknown)}")
+        ok = False
+    sessions = json.loads((ROOT / "sessions.json").read_text())["scenarios"]
+    if unknown := {s["transport"] for s in sessions} - TRANSPORTS:
+        print(f"FAIL sessions.json uses transports the runners lack: {sorted(unknown)}")
+        ok = False
+    if unknown := {s["expect"]["sessions"] for s in sessions} - GROUPINGS:
+        print(f"FAIL sessions.json uses groupings the runners lack: {sorted(unknown)}")
         ok = False
     return ok
 

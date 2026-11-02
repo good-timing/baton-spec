@@ -1,0 +1,26 @@
+{
+  "about": "SPEC §3.4, the session ladder. Each SDK runs every scenario through its MCP install path: a server with one tool, 'echo', which returns its 'text' argument; Baton installed on it with an HTTP sink sending to fake_collector.py in mode 'ok'; and 'clients' clients, each making 'calls' calls of echo, one after another, over 'transport'. 'memory' is the SDK's in-process transport. 'stateful_http' is streamable HTTP where the server gives each client an Mcp-Session-Id. 'stateless_http' is streamable HTTP where it gives none. The runner then closes the install handle and reads the tool_call_start and tool_call_end events the collector accepted. Every one carries 'expect.origin' as session_id_origin and 'expect.transport' as transport_observed, and a call's start and end share one session_id. 'expect.sessions' says how the ids group. 'one': every event has the same id, and sequence_number grows from each event to the next in the order the calls were made. 'per_client': a client's events share one id, which is the Mcp-Session-Id that client was given, and no two clients share one. 'per_call': no two calls share an id.",
+  "scenarios": [
+    {
+      "name": "memory_is_one_session",
+      "transport": "memory",
+      "clients": 1,
+      "calls": 3,
+      "expect": {"sessions": "one", "origin": "minted", "transport": "no-http-request"}
+    },
+    {
+      "name": "stateful_http_is_a_session_per_client",
+      "transport": "stateful_http",
+      "clients": 2,
+      "calls": 2,
+      "expect": {"sessions": "per_client", "origin": "observed", "transport": "http"}
+    },
+    {
+      "name": "stateless_http_is_a_session_per_call",
+      "transport": "stateless_http",
+      "clients": 2,
+      "calls": 2,
+      "expect": {"sessions": "per_call", "origin": "minted", "transport": "http"}
+    }
+  ]
+}
