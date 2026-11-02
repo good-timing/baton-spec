@@ -1,16 +1,18 @@
-"""A collector that fails on purpose, for each SDK's broken-collector tests.
+"""A collector that fails on purpose, for each SDK's collector tests and speed runs.
 
     python fake_collector.py --mode MODE [--delay-ms N]
 
 Prints the port it listens on as the first line of stdout. ``POST
 /v0/events`` with a bearer key answers by mode; any other POST gets 404 or
-401. ``GET /_received`` returns the sequence numbers it accepted, every event it
-accepted in the order it came, how many requests it got, and how many ``client_report``
-events it accepted after an event, which are kept apart from the events. With ``?accepted=N&reports=M&wait_ms=T``
-it first waits up to T ms until it has that many of each. ``refuse_first``
-answers the first event 400 and the rest as ``ok``. Standard library only, so
-any SDK's CI can run it. Stop it by killing the process: a ``hang`` request
-never ends on its own.
+401. ``GET /_received`` returns the sequence numbers it accepted, every event
+it accepted in the order it came, how many it accepted of each event type
+(a resent sequence number counted once), how many requests it got, and how
+many ``client_report`` events it accepted after an event, which are kept
+apart from the events. With ``?accepted=N&reports=M&wait_ms=T`` it first
+waits up to T ms until it has that many of each. ``?lists=0`` leaves out the
+sequence numbers and the events. ``refuse_first`` answers the first event
+400 and the rest as ``ok``. Standard library only, so any SDK's CI can run
+it. Stop it by killing the process: a ``hang`` request never ends on its own.
 """
 
 from __future__ import annotations
@@ -19,6 +21,7 @@ import argparse
 import json
 import threading
 import time
+from collections import Counter
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 
@@ -34,6 +37,7 @@ class _Collector(ThreadingHTTPServer):
         self.delay = delay_ms / 1000
         self.accepted: set[int] = set()
         self.events: list[dict[str, object]] = []
+        self.counts: Counter[str] = Counter()
         self.requests = 0
         self.reports = 0
         self.refused_first = False
@@ -59,12 +63,14 @@ class _Handler(BaseHTTPRequestHandler):
                 and self.server.reports >= query.get("reports", 0),
                 timeout=query.get("wait_ms", 0) / 1000,
             )
-            body = {
-                "accepted": sorted(self.server.accepted),
-                "events": self.server.events,
+            body: dict[str, object] = {
+                "counts": dict(self.server.counts),
                 "requests": self.server.requests,
                 "reports": self.server.reports,
             }
+            if query.get("lists", 1):
+                body["accepted"] = sorted(self.server.accepted)
+                body["events"] = self.server.events
         self._answer(200, json.dumps(body).encode())
 
     def do_POST(self) -> None:
@@ -105,6 +111,8 @@ class _Handler(BaseHTTPRequestHandler):
                 if report and self.server.accepted:
                     self.server.reports += 1
                 elif not report:
+                    if sequence not in self.server.accepted:
+                        self.server.counts[str(event.get("event_type"))] += 1
                     self.server.accepted.add(sequence)
                     self.server.events.append(event)
                 self.server.changed.notify_all()

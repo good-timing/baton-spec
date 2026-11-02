@@ -1,6 +1,6 @@
 """Self-check: each fake_collector.py mode answers as scenarios.json and
 shutdown.json assume, and every mode, step, transport and grouping the
-scenario files use is one the collector and the runners know."""
+scenario files and bench/bench.json use is one the collector and the runners know."""
 
 from __future__ import annotations
 
@@ -106,6 +106,17 @@ def _waits(port: int) -> bool:
     return ok
 
 
+def _counts_once(port: int) -> bool:
+    """A resent sequence number is one event in ``counts``."""
+    before = _received(port, "?lists=0")[0]["counts"]["tool_call_start"]
+    _post(port, sequence=99)
+    _post(port, sequence=99)
+    after = _received(port, "?lists=0")[0]["counts"]["tool_call_start"]
+    ok = after == before + 1
+    print(f"{'ok  ' if ok else 'FAIL'} counts: a resent event adds {after - before}")
+    return ok
+
+
 STEPS = {"call", "flush", "close", "close_twice", "check"}
 TRANSPORTS = {"memory", "stateful_http", "stateless_http"}
 GROUPINGS = {"one", "per_client", "per_call"}
@@ -114,6 +125,7 @@ REASONS = {"buffer_full", "refused", "encode_failed", "write_failed", "after_clo
 
 def _known_words() -> bool:
     files = {name: json.loads((ROOT / name).read_text())["scenarios"] for name in ("scenarios.json", "shutdown.json", "sessions.json")}
+    bench = json.loads((ROOT.parent / "bench" / "bench.json").read_text())["measures"]
     checks = [
         ("scenarios.json", "modes the collector lacks", {s["mode"] for s in files["scenarios.json"]}, {*MODES, "down"}),
         ("shutdown.json", "modes the collector lacks", {s["mode"] for s in files["shutdown.json"]}, set(MODES)),
@@ -121,6 +133,7 @@ def _known_words() -> bool:
         ("shutdown.json", "drop reasons SPEC lacks", {r for s in files["shutdown.json"] for r in s["expect"]["dropped"]}, REASONS),
         ("sessions.json", "transports the runners lack", {s["transport"] for s in files["sessions.json"]}, TRANSPORTS),
         ("sessions.json", "groupings the runners lack", {s["expect"]["sessions"] for s in files["sessions.json"]}, GROUPINGS),
+        ("bench.json", "modes the collector lacks", {m["collector"] for m in bench}, {*MODES, "down"}),
     ]
     ok = True
     for name, what, used, known in checks:
@@ -156,15 +169,17 @@ def main() -> int:
                 _post(port, event_type="client_report", sequence=2)
             received, _ = _received(port)
             accepted, events, reports = received["accepted"], received["events"], received["reports"]
+            counted, _ = _received(port, "?lists=0")
             if mode == "ok":
                 failed |= not _waits(port)
+                failed |= not _counts_once(port)
         finally:
             process.kill()
             process.wait()
         want_accepted = [7] if want == 202 else []
         want_accepted += [8 + i for i, status in enumerate(then) if status == 202]
         sent = [(e["event_type"], e["sequence_number"]) for e in events]
-        ok = (got, got_then, wrong_path, no_key, accepted, sent, reports) == (
+        ok = (got, got_then, wrong_path, no_key, accepted, sent, reports, counted) == (
             want,
             then,
             404,
@@ -172,6 +187,11 @@ def main() -> int:
             want_accepted,
             [("tool_call_start", n) for n in want_accepted],
             1 if accepting else 0,
+            {
+                "counts": {"tool_call_start": len(want_accepted)} if want_accepted else {},
+                "requests": received["requests"],
+                "reports": received["reports"],
+            },
         ) and took >= least
         failed |= not ok
         print(f"{'ok  ' if ok else 'FAIL'} {mode}: {got} then {got_then} in {took:.2f}s, accepted {accepted}, reports {reports}")

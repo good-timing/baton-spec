@@ -40,6 +40,12 @@ producer owns this repo; it's the neutral thing they all agree with.
 - `collector/intent.json` — the injected `user_goal` (SPEC §5.1.2): it is
   listed as required, a call without it is still served, and it and the
   retired names land in the intent members, not in `params`.
+- `bench/bench.json` and `scripts/compare_bench.py` — what each SDK's speed
+  and load runner measures against the same collector: the time Baton adds
+  to a call, a burst of 10,000 calls, the collector hung or down, and memory
+  growth over 20,000 calls with the collector healthy and hung. The
+  compare script prints the last release and the new code side by side.
+  It reports; it decides nothing.
 
 ## Using this from a producer repo
 
