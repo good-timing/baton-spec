@@ -1,0 +1,20 @@
+{
+  "about": "SPEC §5.1.2, the injected user_goal. Each SDK runs every scenario through its MCP install path with its default settings: a server with one tool, 'echo', which takes one string argument, 'text', and returns it; Baton installed on it with an HTTP sink sending to fake_collector.py in mode 'ok'; and a client in the same process. The runner first lists the tools: echo's input schema must have a 'user_goal' property of type string, and list it under 'required'. It then calls echo once with 'arguments'. The call must return the text and not be an error, whether or not the arguments carry user_goal. After closing the install handle, the runner reads the one tool_call_start the collector accepted: its payload's 'params' must equal 'expect.params', and its 'call_intent', 'call_expected', 'call_workflow' and 'intent_source' must equal the same members of 'expect', where absent and null are equal. 'expected_result' and 'overall_task' are retired names a client may still send (SPEC §13).",
+  "scenarios": [
+    {
+      "name": "user_goal_becomes_the_call_intent",
+      "arguments": {"text": "hi", "user_goal": "1: say hi; success is hi"},
+      "expect": {"params": {"text": "hi"}, "call_intent": "1: say hi; success is hi", "intent_source": "injected_param"}
+    },
+    {
+      "name": "a_call_without_user_goal_is_served",
+      "arguments": {"text": "hi"},
+      "expect": {"params": {"text": "hi"}, "call_intent": null, "intent_source": null}
+    },
+    {
+      "name": "retired_names_are_kept_off_the_params",
+      "arguments": {"text": "hi", "user_goal": "1: say hi; success is hi", "expected_result": "hi", "overall_task": "greet"},
+      "expect": {"params": {"text": "hi"}, "call_intent": "1: say hi; success is hi", "call_expected": "hi", "call_workflow": "greet", "intent_source": "injected_param"}
+    }
+  ]
+}

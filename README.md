@@ -37,6 +37,9 @@ producer owns this repo; it's the neutral thing they all agree with.
   neither slows a call nor holds close.
 - `collector/sessions.json` — how the session ids group (SPEC §3.4) over
   the in-process transport, stateful and stateless streamable HTTP.
+- `collector/intent.json` — the injected `user_goal` (SPEC §5.1.2): it is
+  listed as required, a call without it is still served, and it and the
+  retired names land in the intent members, not in `params`.
 
 ## Using this from a producer repo
 
