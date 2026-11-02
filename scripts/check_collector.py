@@ -110,9 +110,9 @@ def _batch_answers(port: int, mode: str) -> bool:
         bad = [_post_batch(port, body)[0] for body in ({"events": []}, _batch_of(*range(101)), [1], {"events": [{}]})]
         before = _received(port, "?lists=0")[0]["counts"].get("tool_call_start", 0)
         shared = _post_batch(port, {"events": [{"event_type": "tool_call_start", "sequence_number": 40, "event_id": i} for i in ("a", "b")]})
-        added = _received(port, "?lists=0")[0]["counts"]["tool_call_start"] - before
+        added = _received(port, "?lists=0")[0]["counts"].get("tool_call_start", 0) - before
         ok = ok and resent == (200, ["duplicate", "accepted"]) and shared == (200, ["accepted"] * 2) and added == 2 and bad == [400] * 4
-        extra = f", resent {resent}, two sessions' sequence 40 {shared}, bad {bad}"
+        extra = f", resent {resent}, two sessions' sequence 40 {shared} counted {added}, bad {bad}"
     if mode == "split":
         two = _post_batch(port, _batch_of(30, 31))
         ok = ok and two == (200, ["accepted"] * 2)
