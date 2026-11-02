@@ -108,8 +108,10 @@ def _batch_answers(port: int, mode: str) -> bool:
     if mode == "ok":
         resent = _post_batch(port, _batch_of(22, 23))
         bad = [_post_batch(port, body)[0] for body in ({"events": []}, _batch_of(*range(101)), [1], {"events": [{}]})]
+        before = _received(port, "?lists=0")[0]["counts"].get("tool_call_start", 0)
         shared = _post_batch(port, {"events": [{"event_type": "tool_call_start", "sequence_number": 40, "event_id": i} for i in ("a", "b")]})
-        ok = ok and resent == (200, ["duplicate", "accepted"]) and shared == (200, ["accepted"] * 2) and bad == [400] * 4
+        added = _received(port, "?lists=0")[0]["counts"]["tool_call_start"] - before
+        ok = ok and resent == (200, ["duplicate", "accepted"]) and shared == (200, ["accepted"] * 2) and added == 2 and bad == [400] * 4
         extra = f", resent {resent}, two sessions' sequence 40 {shared}, bad {bad}"
     if mode == "split":
         two = _post_batch(port, _batch_of(30, 31))
@@ -224,7 +226,7 @@ def _single_answers(port: int, mode: str) -> bool:
     want, least = EXPECTED[mode]
     then = THEN.get(mode, [])
     accepting = 202 in (want, *then)
-    failed = False
+    extra_ok = True
     wrong_path, _ = _post(port, path="/v1/events")
     no_key, _ = _post(port, key=False)
     if accepting:
@@ -237,8 +239,7 @@ def _single_answers(port: int, mode: str) -> bool:
     accepted, events, reports = received["accepted"], received["events"], received["reports"]
     counted, _ = _received(port, "?lists=0")
     if mode == "ok":
-        failed |= not _waits(port)
-        failed |= not _counts_once(port)
+        extra_ok = _waits(port) and _counts_once(port)
     want_accepted = [7] if want == 202 else []
     want_accepted += [8 + i for i, status in enumerate(then) if status == 202]
     sent = [(e["event_type"], e["sequence_number"]) for e in events]
@@ -257,7 +258,7 @@ def _single_answers(port: int, mode: str) -> bool:
         },
     ) and took >= least
     print(f"{'ok  ' if ok else 'FAIL'} {mode}: {got} then {got_then} in {took:.2f}s, accepted {accepted}, reports {reports}")
-    return ok and not failed
+    return ok and extra_ok
 
 
 def main() -> int:

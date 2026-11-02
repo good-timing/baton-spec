@@ -14,9 +14,9 @@ first waits up to T ms until it has that many of each. ``?lists=0`` leaves
 out the sequence numbers and the events. ``refuse_first`` refuses the first
 event and accepts the rest. ``no_batch`` is a collector without the batch
 endpoint. ``split`` answers 413 to a batch of more than 2 events, and ``413``
-to every request. Standard library only, so any SDK's CI can run it. Stop it
-by killing the process: a ``hang`` request never ends on its own. ``429``
-asks for a 1 s wait with ``Retry-After``.
+to every request. ``429`` asks for a 1 s wait with ``Retry-After``. Standard
+library only, so any SDK's CI can run it. Stop it by killing the process: a
+``hang`` request never ends on its own.
 """
 
 from __future__ import annotations
