@@ -4,8 +4,8 @@
 
 Prints the port it listens on as the first line of stdout. ``POST
 /v0/events`` with a bearer key answers by mode; any other POST gets 404 or
-401. ``GET /_received`` returns the sequence numbers it accepted, the accepted
-events themselves, how many requests it got, and how many ``client_report``
+401. ``GET /_received`` returns the sequence numbers it accepted, every event it
+accepted in the order it came, how many requests it got, and how many ``client_report``
 events it accepted after an event, which are kept apart from the events. With ``?accepted=N&reports=M&wait_ms=T``
 it first waits up to T ms until it has that many of each. ``refuse_first``
 answers the first event 400 and the rest as ``ok``. Standard library only, so

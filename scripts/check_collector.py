@@ -12,6 +12,7 @@ import sys
 import threading
 import time
 from collections.abc import Callable
+from typing import Any
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent / "collector"
@@ -56,17 +57,11 @@ def _post(
         connection.close()
 
 
-def _received(port: int, query: str = "") -> tuple[list[int], int, float]:
-    accepted, _, reports, took = _received_events(port, query)
-    return accepted, reports, took
-
-
-def _received_events(port: int, query: str = "") -> tuple[list[int], list[dict[str, object]], int, float]:
+def _received(port: int, query: str = "") -> tuple[dict[str, Any], float]:
     connection = http.client.HTTPConnection("127.0.0.1", port, timeout=3)
     started = time.monotonic()
     connection.request("GET", f"/_received{query}")
-    received = json.load(connection.getresponse())
-    return received["accepted"], received["events"], received["reports"], time.monotonic() - started
+    return json.load(connection.getresponse()), time.monotonic() - started
 
 
 def _woken(port: int, query: str, then: Callable[[], object]) -> float:
@@ -75,7 +70,7 @@ def _woken(port: int, query: str, then: Callable[[], object]) -> float:
 
     def wait() -> None:
         try:
-            took.append(_received(port, query)[2])
+            took.append(_received(port, query)[1])
         except OSError:
             pass
 
@@ -90,8 +85,8 @@ def _woken(port: int, query: str, then: Callable[[], object]) -> float:
 def _waits(port: int) -> bool:
     """``/_received`` waits for the events and reports it is asked for, and no longer.
     Run after one event and one report were accepted."""
-    _, _, unmet = _received(port, "?accepted=9&wait_ms=300")
-    _, _, met = _received(port, "?accepted=1&reports=1&wait_ms=2000")
+    _, unmet = _received(port, "?accepted=9&wait_ms=300")
+    _, met = _received(port, "?accepted=1&reports=1&wait_ms=2000")
     by_event = _woken(port, "?accepted=2&wait_ms=2000", lambda: _post(port, sequence=8))
     by_report = _woken(
         port, "?reports=2&wait_ms=2000", lambda: _post(port, event_type="client_report", sequence=3)
@@ -118,26 +113,20 @@ REASONS = {"buffer_full", "refused", "encode_failed", "write_failed", "after_clo
 
 
 def _known_words() -> bool:
+    files = {name: json.loads((ROOT / name).read_text())["scenarios"] for name in ("scenarios.json", "shutdown.json", "sessions.json")}
+    checks = [
+        ("scenarios.json", "modes the collector lacks", {s["mode"] for s in files["scenarios.json"]}, {*MODES, "down"}),
+        ("shutdown.json", "modes the collector lacks", {s["mode"] for s in files["shutdown.json"]}, set(MODES)),
+        ("shutdown.json", "steps the runners lack", {k for s in files["shutdown.json"] for step in s["steps"] for k in step}, STEPS),
+        ("shutdown.json", "drop reasons SPEC lacks", {r for s in files["shutdown.json"] for r in s["expect"]["dropped"]}, REASONS),
+        ("sessions.json", "transports the runners lack", {s["transport"] for s in files["sessions.json"]}, TRANSPORTS),
+        ("sessions.json", "groupings the runners lack", {s["expect"]["sessions"] for s in files["sessions.json"]}, GROUPINGS),
+    ]
     ok = True
-    for name in ("scenarios.json", "shutdown.json"):
-        scenarios = json.loads((ROOT / name).read_text())["scenarios"]
-        if unknown := {s["mode"] for s in scenarios} - set(MODES) - {"down"}:
-            print(f"FAIL {name} uses modes the collector lacks: {sorted(unknown)}")
+    for name, what, used, known in checks:
+        if unknown := used - known:
+            print(f"FAIL {name} uses {what}: {sorted(unknown)}")
             ok = False
-    shutdown = json.loads((ROOT / "shutdown.json").read_text())["scenarios"]
-    if unknown := {key for s in shutdown for step in s["steps"] for key in step} - STEPS:
-        print(f"FAIL shutdown.json uses steps the runners lack: {sorted(unknown)}")
-        ok = False
-    if unknown := {reason for s in shutdown for reason in s["expect"]["dropped"]} - REASONS:
-        print(f"FAIL shutdown.json names drop reasons SPEC lacks: {sorted(unknown)}")
-        ok = False
-    sessions = json.loads((ROOT / "sessions.json").read_text())["scenarios"]
-    if unknown := {s["transport"] for s in sessions} - TRANSPORTS:
-        print(f"FAIL sessions.json uses transports the runners lack: {sorted(unknown)}")
-        ok = False
-    if unknown := {s["expect"]["sessions"] for s in sessions} - GROUPINGS:
-        print(f"FAIL sessions.json uses groupings the runners lack: {sorted(unknown)}")
-        ok = False
     return ok
 
 
@@ -165,7 +154,8 @@ def main() -> int:
             got_then = [_post(port, sequence=8 + i)[0] for i in range(len(then))]
             if accepting:
                 _post(port, event_type="client_report", sequence=2)
-            accepted, events, reports, _ = _received_events(port)
+            received, _ = _received(port)
+            accepted, events, reports = received["accepted"], received["events"], received["reports"]
             if mode == "ok":
                 failed |= not _waits(port)
         finally:

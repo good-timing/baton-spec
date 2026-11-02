@@ -40,13 +40,14 @@
     {
       "name": "a_hung_collector_neither_slows_a_call_nor_holds_close",
       "mode": "hang",
+      "settings": {"shutdown_budget_ms": 300},
       "steps": [{"call": 3}, {"close": {}}],
       "expect": {"dropped": {"unsent_at_close": 6}}
     },
     {
       "name": "close_cuts_a_request_longer_than_its_budget",
       "mode": "hang",
-      "settings": {"request_timeout_ms": 30000},
+      "settings": {"request_timeout_ms": 30000, "shutdown_budget_ms": 300},
       "steps": [{"call": 1}, {"close": {}}],
       "expect": {"dropped": {"unsent_at_close": 2}}
     }
