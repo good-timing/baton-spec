@@ -11,6 +11,8 @@
   "client_observed": null,
   "principal": null,
   "organization": null,
+  "labels": null,
+  "capture": null,
   "call_id": null,
   "transport_observed": null,
   "session_id_origin": "minted",

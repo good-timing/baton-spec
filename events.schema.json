@@ -77,6 +77,36 @@
           ],
           "default": null
         },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Labels"
+        },
+        "capture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CaptureObserved"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "call_id": {
           "anyOf": [
             {
@@ -253,6 +283,51 @@
       "title": "AnnotationPayload",
       "type": "object"
     },
+    "CaptureObserved": {
+      "additionalProperties": false,
+      "description": "Which collector settings a call ran under (SPEC \u00a711.4, \u00a72.6).",
+      "properties": {
+        "settings_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Settings Version"
+        },
+        "audience": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Audience"
+        },
+        "overlay": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Overlay"
+        }
+      },
+      "title": "CaptureObserved",
+      "type": "object"
+    },
     "ClientInfoObserved": {
       "additionalProperties": false,
       "description": "A client's ``clientInfo`` as it declared it.",
@@ -389,6 +464,36 @@
           "anyOf": [
             {
               "$ref": "#/$defs/OrganizationWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Labels"
+        },
+        "capture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CaptureObserved"
             },
             {
               "type": "null"
@@ -643,6 +748,36 @@
           ],
           "default": null
         },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Labels"
+        },
+        "capture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CaptureObserved"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "call_id": {
           "anyOf": [
             {
@@ -811,6 +946,36 @@
           "anyOf": [
             {
               "$ref": "#/$defs/OrganizationWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Labels"
+        },
+        "capture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CaptureObserved"
             },
             {
               "type": "null"
@@ -1003,6 +1168,36 @@
           ],
           "default": null
         },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Labels"
+        },
+        "capture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CaptureObserved"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "call_id": {
           "anyOf": [
             {
@@ -1179,6 +1374,36 @@
           ],
           "default": null
         },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Labels"
+        },
+        "capture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CaptureObserved"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "call_id": {
           "anyOf": [
             {
@@ -1347,6 +1572,36 @@
           "anyOf": [
             {
               "$ref": "#/$defs/OrganizationWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Labels"
+        },
+        "capture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CaptureObserved"
             },
             {
               "type": "null"
@@ -1534,6 +1789,36 @@
           ],
           "default": null
         },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Labels"
+        },
+        "capture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CaptureObserved"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "call_id": {
           "anyOf": [
             {
@@ -1682,6 +1967,36 @@
           "anyOf": [
             {
               "$ref": "#/$defs/OrganizationWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Labels"
+        },
+        "capture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CaptureObserved"
             },
             {
               "type": "null"
@@ -1857,6 +2172,36 @@
           "anyOf": [
             {
               "$ref": "#/$defs/OrganizationWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Labels"
+        },
+        "capture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CaptureObserved"
             },
             {
               "type": "null"
@@ -2044,6 +2389,36 @@
           ],
           "default": null
         },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Labels"
+        },
+        "capture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CaptureObserved"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "call_id": {
           "anyOf": [
             {
@@ -2192,6 +2567,36 @@
           "anyOf": [
             {
               "$ref": "#/$defs/OrganizationWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Labels"
+        },
+        "capture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CaptureObserved"
             },
             {
               "type": "null"
@@ -2367,6 +2772,36 @@
           "anyOf": [
             {
               "$ref": "#/$defs/OrganizationWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Labels"
+        },
+        "capture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CaptureObserved"
             },
             {
               "type": "null"
@@ -2559,6 +2994,36 @@
           ],
           "default": null
         },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Labels"
+        },
+        "capture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CaptureObserved"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "call_id": {
           "anyOf": [
             {
@@ -2728,6 +3193,36 @@
           "anyOf": [
             {
               "$ref": "#/$defs/OrganizationWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Labels"
+        },
+        "capture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CaptureObserved"
             },
             {
               "type": "null"
@@ -2949,6 +3444,36 @@
           ],
           "default": null
         },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Labels"
+        },
+        "capture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CaptureObserved"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "call_id": {
           "minLength": 1,
           "title": "Call Id",
@@ -3133,6 +3658,36 @@
           "anyOf": [
             {
               "$ref": "#/$defs/OrganizationWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Labels"
+        },
+        "capture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CaptureObserved"
             },
             {
               "type": "null"
@@ -3353,6 +3908,36 @@
           ],
           "default": null
         },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Labels"
+        },
+        "capture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CaptureObserved"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "call_id": {
           "minLength": 1,
           "title": "Call Id",
@@ -3563,6 +4148,36 @@
           ],
           "default": null
         },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Labels"
+        },
+        "capture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CaptureObserved"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "call_id": {
           "anyOf": [
             {
@@ -3731,6 +4346,36 @@
           "anyOf": [
             {
               "$ref": "#/$defs/OrganizationWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Labels"
+        },
+        "capture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CaptureObserved"
             },
             {
               "type": "null"
@@ -3911,6 +4556,36 @@
           "anyOf": [
             {
               "$ref": "#/$defs/OrganizationWire"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Labels"
+        },
+        "capture": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CaptureObserved"
             },
             {
               "type": "null"

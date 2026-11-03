@@ -21,6 +21,8 @@
     "form": "raw",
     "display_name": "Acme"
   },
+  "labels": null,
+  "capture": null,
   "call_id": "00000000-0000-7000-8000-000000000016",
   "transport_observed": null,
   "session_id_origin": "minted",
