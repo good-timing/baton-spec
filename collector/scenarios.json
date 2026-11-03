@@ -84,7 +84,7 @@
       "mode": "hang",
       "events": 3,
       "settings": {
-        "request_timeout_ms": 2000
+        "request_timeout_ms": 1000
       },
       "expect": {
         "accepted": 0,
