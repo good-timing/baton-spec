@@ -1,7 +1,7 @@
 # baton-spec
 
-The machine-readable wire contract for the Baton event envelope (see
-`baton`'s `docs/SPEC.md` §11.4 for the prose spec). Every Baton producer —
+The Baton wire contract. `SPEC.md` is the prose spec, and the files below are
+its machine-readable form (the event envelope is §11.4). Every Baton producer —
 `baton-sdk` (Python), `baton-proxy`, `baton-extmcp`, and the TypeScript SDK —
 submodules this repo and validates its own emitted events against it. No
 producer owns this repo; it's the neutral thing they all agree with.
