@@ -595,7 +595,7 @@ Every event the SDK emits — including those for failed calls — ships with th
 
 Events go to the collector (§2.1). The "no auto-send without consent" guarantee today is structural — the SDK won't initialize without a `consent_token`, and every event carries it — rather than per-report interactive.
 
-### 6.4 Auto-detection (future)
+### 6.4 Collector-side detection
 
 Collector-side behaviour. Not part of this contract.
 
@@ -695,7 +695,7 @@ A conforming SDK MUST:
    | `unsent_at_close` | close ran out of time before it was seen delivered |
 
    The counts are for the whole process and only grow. An event that is retried and then lost counts once, under the reason that ended it. **At close the count is best effort.** When close's time runs out, the producer MAY count as `unsent_at_close` any event it has not seen delivered, including one still being sent that may yet arrive, and its counts MAY be off by the events in flight then. Close never waits past its limit (rule 7) to make a count exact. It still counts an event under `buffer_full`, `refused`, `encode_failed` or `after_close` when it already knows that reason. An event sent to several sinks MAY be counted once for each sink that lost it. These names are wire values (§11.4.7). A new reason is a SPEC change, and a consumer accepts a name it does not know. Outside this rule: process kill and freeze, and an exit without close. With no exit hook nothing runs to count; with one, no `client_report` can follow a count taken then, so the producer warns about the events it leaves unsent instead of counting them (rule 7).
-9. **MAY do cheap stateless classification.** Any classification it does reads one event alone. State-dependent classification (retry_loop) MUST NOT happen in the SDK.
+9. **Records, does not classify.** An SDK records what happened on each request. It does not sort events into kinds of problem.
 10. **Install nothing when nothing says where events go.** When an MCP install has no DSN (neither passed nor in `BATON_DSN`) and no setting that names who sends events or where they go (`vendor_id`, `tenant_id` or a sink), it logs a warning that it records nothing, and returns a handle whose close does nothing; the vendor's server starts as usual. A setting means one the install is given; an environment variable other than `BATON_DSN`, such as `BATON_TENANT_ID`, does not count, so a stale one cannot stop a server. Every other check still runs first and still fails: a server of the wrong kind, a DSN that does not parse, or a setting whose value is not valid. A check that depends on the identity a DSN supplies, such as the length of instructions that name the server, cannot run without one. This is Sentry's rule for a missing DSN; a server a customer runs must not fail to start over an unset variable. The library API (§5.6) is not an install and is unchanged.
 
 A conforming SDK MUST NOT:
