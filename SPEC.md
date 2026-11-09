@@ -133,6 +133,48 @@ A document is valid when `version` is a positive integer, `audiences` is a non-e
 
 Each event records which settings it ran under in `capture` (§11.4).
 
+**Overlays (experimental, §13).** An overlay changes the text and the tools an agent sees, without a code change. The document can hold them:
+
+```json
+{
+  "version": 8,
+  "audiences": [
+    {"id": "beta", "match": {"label": ["beta"]},
+     "capture": {"goal": "required", "reports": "on", "results": "full"},
+     "overlay": "ov_7f2c"},
+    {"id": "everyone", "match": {}, "capture": {"goal": "required", "reports": "on", "results": "off"}}
+  ],
+  "overlays": {
+    "ov_7f2c": {"actions": [
+      {"target": {"tool": "book_slot", "param": "timezone"}, "append": "Use an IANA name, such as Europe/Paris."},
+      {"target": {"tool": "legacy_book"}, "remove": true}
+    ]},
+    "ov_51aa": {"actions": [
+      {"target": {"instructions": true}, "append": "Times are in the user's timezone."}
+    ]}
+  },
+  "server_overlay": "ov_51aa"
+}
+```
+
+- `overlays` maps an id to an overlay. The collector sends only the overlays the document names. An overlay never changes once saved: a change is a new id.
+- A bad overlay never makes the document invalid. If `overlays` is not an object, or an `overlay` or `server_overlay` names an id it does not hold, the producer applies no overlay there and warns once.
+- An audience's `overlay` applies to the callers that audience matches, from their next `tools/list`.
+- `server_overlay` applies to every caller. It is the only place an action on the instructions can go, because the instructions are sent at `initialize`, before the producer knows the caller. It reaches new connections only: a session keeps the instructions it was given.
+- Each action has a `target` and one change. A producer applies the actions in order.
+
+| target | change | where |
+|---|---|---|
+| `{"tool": n}` | `"append"` or `"replace"` its description; `"remove": true` hides the tool | an audience's overlay |
+| `{"tool": n, "param": p}` | `"append"` or `"replace"` its description; `"remove": true` hides it, only if the tool does not require it; `"required": true` lists it as required | an audience's overlay |
+| `{"instructions": true}` | `"append"` text after the vendor's instructions, before Baton's (§5.1.2) | `server_overlay` |
+| `{"agent_text": id}` | `"append"` or `"replace"` that piece of Baton's text (§11.4.2) | `instructions.*` in `server_overlay`; `goal_param.description` and `report_tool.*` in an audience's overlay |
+
+- `"required": true` is shown to the agent only. A producer never rejects a call that leaves the param out.
+- A hidden tool is hidden from `tools/call` too: a call to it gets the answer an unknown tool gets.
+- A producer skips an action it cannot apply and warns once: an unknown target or change, a tool or param that does not exist, a required param to hide, or a target outside its place in the table. It applies the rest. An overlay never fails a `tools/list` or a call.
+- `capture.overlay` (§11.4) records the audience's overlay. `seam_augmentations.server_overlay` (§11.4.2) records the server's.
+
 **The tool list and the instructions.**
 
 - Each `tools/list` is answered with the caller's `goal` and `reports`. A tool that declares its own `user_goal` keeps its own.
@@ -943,7 +985,7 @@ Five rules, each of them a mistake this project has already made or nearly made:
 |---|---|
 | `settings_version` | the document's `version` |
 | `audience` | the `id` of the audience that matched this caller |
-| `overlay` | reserved for the hash of the overlay a call saw; no producer sends it yet (experimental, §13) |
+| `overlay` | the id of the audience's overlay this call was served (§2.6), if any (experimental, §13) |
 
 A consumer MUST NOT trust `settings_version` as proof a document was saved: any key holder can send any value. A consumer ignores a member it does not know.
 
@@ -1023,7 +1065,8 @@ Mirrors baton-proxy's `MessageProcessor._capture_surface` / `Emitter.enqueue_sur
     "agent_text": {                                     // experimental (§13)
       "instructions.report_pointer": {"text": "Use `acme_annotate` to report ...", "source": "default"},
       "report_tool.description": {"text": "Report an Acme tool call that went wrong ...", "source": "default"}
-    }
+    },
+    "server_overlay": null                              // experimental (§13)
   }
 }
 ```
@@ -1041,7 +1084,9 @@ Mirrors baton-proxy's `MessageProcessor._capture_surface` / `Emitter.enqueue_sur
 | `report_tool.fields.<name>` | a report tool field's own description, for a field that has one |
 | `report_tool.refusal` | what the report tool answers a call it refuses (§5.1.1) |
 
-Each value is `{"text": "...", "source": "default" | "appended" | "replaced"}`: `text` is the text exactly as served, with the server's name filled in, and `source` says whether it is Baton's (`default`), Baton's with the vendor's text after it (`appended`), or the vendor's alone (`replaced`). A value is null when the producer cannot know the text. An id is absent when that text was not served: no report tool, no `report_tool.*`; no pointer sentence, no `instructions.report_pointer`. A library snapshot sends `instructions.*` as null, because the vendor serves the instructions itself. Like the rest of the payload, `agent_text` carries the code's values, not a caller's (§5.6 rule 7): a consumer that applies Console settings per caller works out each caller's text from them. A consumer MUST ignore an id it does not know, and reads a missing `agent_text` as unknown.
+Each value is `{"text": "...", "source": "default" | "appended" | "replaced"}`: `text` is the text exactly as served, with the server's name filled in, and `source` says whether it is Baton's (`default`), Baton's with the vendor's text after it (`appended`), or the vendor's alone (`replaced`). A value is null when the producer cannot know the text. An id is absent when that text was not served: no report tool, no `report_tool.*`; no pointer sentence, no `instructions.report_pointer`. A library snapshot sends `instructions.*` and `report_tool.*` as null, because the vendor serves them itself. Like the rest of the payload, `agent_text` carries the code's values, not a caller's (§5.6 rule 7): a consumer that applies Console settings per caller works out each caller's text from them. `source` shows changes from `server_overlay` only (§2.6). An audience's overlay is per caller, so the snapshot never shows it: a consumer works it out from `capture.overlay` and the document. A consumer MUST ignore an id it does not know, and reads a missing `agent_text` as unknown.
+
+**`seam_augmentations.server_overlay` is the id of the `server_overlay` (§2.6) the producer applied** (experimental, §13), or null when it applied none. A producer that does not apply overlays leaves it out. Because it is not in `surface_hash`, a producer sends a new snapshot when this id changes, even if the surface did not.
 
 **Capture mechanism differs by adapter** (both converge on the same wire shape):
 - `baton.integrations.standalone` (standalone `fastmcp` library) has a real `on_list_tools` middleware hook — the snapshot is captured and (if new) emitted on every `tools/list` response, using the vendor-true tools `call_next` returns before this adapter's own injection loop runs.
@@ -1561,6 +1606,7 @@ From 1.0, the wire format is additive-only: no event type, field or value is rem
 |---|---|
 | `capture.overlay` | §11.4 |
 | `surface_snapshot` `seam_augmentations.agent_text` | §11.4.2 |
+| overlays in the settings document, and `seam_augmentations.server_overlay` | §2.6, §11.4.2 |
 | `client_report` | §11.4.7 |
 | `trace_context` (reserved, not sent) | §5.2 |
 
@@ -1572,6 +1618,7 @@ From 1.0, the wire format is additive-only: no event type, field or value is rem
 
 A reference here to a §13 entry by date or version, such as "§13, 0.8.22", names an entry in the git history of `baton`'s `docs/SPEC.md`, where the changes up to 1.0 are.
 
+- **Overlays** (experimental): the settings document can hold overlays, per audience and for the whole server (§2.6). `capture.overlay` is now the overlay's id, not a hash. `seam_augmentations.server_overlay` records the server's (§11.4.2).
 - **`seam_augmentations.agent_text`** (experimental): the text Baton showed the agent, per piece, with whether the vendor changed it (§11.4.2). The vector omits it until every producer sends it (§11.4.6).
 - **Settings are stable.** `GET /v0/settings` and its document (§2.6), `labels` and `capture` (§11.4) leave the experimental table. `capture.overlay` stays experimental.
 
