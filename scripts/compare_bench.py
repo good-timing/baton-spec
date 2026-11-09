@@ -17,12 +17,13 @@ from __future__ import annotations
 import json
 import statistics
 import sys
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
 BENCH = json.loads((Path(__file__).resolve().parent.parent / "bench" / "bench.json").read_text())
 METRICS = {m["name"]: m["metrics"] for m in BENCH["measures"]}
-KEYS = set(BENCH["result"])
+KEYS = set(BENCH["result"]) - {"cpu"}
 
 
 def _shape_errors(name: str, run: dict[str, Any]) -> list[str]:
@@ -52,8 +53,13 @@ def _change(old: list[float], new: list[float]) -> str:
     return f"{(after - before) / abs(before):+.0%}{noise}"
 
 
-def _cell(values: list[float]) -> str:
+def cell(values: list[float]) -> str:
     return f"{_figure(statistics.median(values))} ({_figure(min(values))}–{_figure(max(values))})"
+
+
+def cpus(group: list[dict[str, Any]]) -> str:
+    counts = Counter(str(r.get("cpu", "unknown")) for r in group)
+    return ", ".join(f"{cpu} ({n})" for cpu, n in counts.most_common())
 
 
 def table(runs: list[dict[str, Any]]) -> str:
@@ -68,6 +74,8 @@ def table(runs: list[dict[str, Any]]) -> str:
         "",
         f"{BENCH['bar']} Median (lowest–highest) of {', '.join(str(len(g)) for g in groups.values())} runs.",
         "",
+        "CPU: " + "; ".join(f"{label}: {cpus(group)}" for label, group in zip(labels, groups.values())),
+        "",
         "| measure | metric | " + " | ".join(labels) + (" | change |" if pair else ""),
         "|---|---|" + "---|" * len(groups) + ("---|" if pair else ""),
     ]
@@ -78,7 +86,7 @@ def table(runs: list[dict[str, Any]]) -> str:
             for group in groups.values()
         ]
         change = f" {_change(*values)} |" if pair else ""
-        lines.append(f"| {measure} | {metric} | " + " | ".join(_cell(v) for v in values) + " |" + change)
+        lines.append(f"| {measure} | {metric} | " + " | ".join(cell(v) for v in values) + " |" + change)
     return "\n".join(lines)
 
 

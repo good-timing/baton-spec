@@ -47,7 +47,8 @@ producer owns this repo; it's the neutral thing they all agree with.
   to a call, a burst of 10,000 calls, the collector hung or down, and memory
   growth over 20,000 calls with the collector healthy and hung. The
   compare script prints the last release and the new code side by side.
-  It reports; it decides nothing.
+  It reports; it decides nothing. `scripts/check_bench_limit.py` is what
+  decides: it fails unless each of a measure's `limits` holds.
 
 ## Using this from a producer repo
 

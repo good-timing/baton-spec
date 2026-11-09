@@ -1,6 +1,6 @@
 {
   "about": "What each SDK's speed and load runner measures. A runner installs Baton through its MCP install path with default settings and an HTTP sink with default settings, sending to collector/fake_collector.py in the measure's 'collector' mode ('down': a port nobody listens on). The server has a tool 'echo', which returns its 'text' argument, and a tool 'large', which takes no arguments and returns a text of the measure's 'result_bytes' bytes: 'hello ' repeated and cut to that length. A client in the same process, over the SDK's in-process transport, calls echo with text 'hello' and nothing else, except in 'large_result', where it calls large. Each measure starts its own collector, server, client and install, and ends by closing the install handle and stopping the collector. 'concurrency' is how many calls are in flight at once on that one client; 'warmup' calls run first and are not counted. Times are wall-clock per call, from the client's call to its answer. The runner writes one JSON file per run, shaped as 'result' says. scripts/compare_bench.py reads a set of these files and prints a table.",
-  "bar": "The numbers compare two versions of one SDK on one machine. They are not what a vendor sees in production: the collector is local and the client is in the same process.",
+  "bar": "The numbers compare two versions of one SDK on one machine. They are not what a vendor sees in production: the collector is local and the client is in the same process. The exception is a measure's 'limits': over 'repeats' runs of that measure alone, each named metric's median must be under its limit. scripts/check_bench_limit.py runs and checks them.",
   "repeats": 5,
   "measures": [
     {
@@ -10,7 +10,8 @@
       "warmup": 200,
       "calls": 2000,
       "concurrency": 1,
-      "metrics": ["plain_p50_ms", "plain_p99_ms", "baton_p50_ms", "baton_p99_ms", "added_p50_ms", "added_p99_ms"]
+      "metrics": ["plain_p50_ms", "plain_p99_ms", "baton_p50_ms", "baton_p99_ms", "added_p50_ms", "added_p99_ms"],
+      "limits": {"added_p50_ms": 1}
     },
     {
       "name": "burst",
@@ -73,7 +74,8 @@
     "version": "the version of the SDK measured, as its package says",
     "source": "'published' for a version from the package registry, 'checkout' for the code in the repository",
     "runtime": "the language runtime and its version",
-    "max_rss_bytes": "the process's peak resident memory once the measures before 'memory' have run, since Python's heap reading itself takes memory",
-    "measures": "an object with a member per measure name, each an object with a number per metric"
+    "cpu": "the CPU model as the OS names it (on Linux, the first 'model name' in /proc/cpuinfo), else 'unknown'; shared CI machines differ in speed. Optional: kept results may lack it",
+    "max_rss_bytes": "the process's peak resident memory once the measures before 'memory' have run, since Python's heap reading itself takes memory; at exit when no memory measure ran",
+    "measures": "an object with a member per measure run, each an object with a number per metric. A run of one measure alone has that member only"
   }
 }
