@@ -85,8 +85,6 @@ The collector MUST reject any request without a valid bearer. The collector MUST
 
 ### 2.6 Capture settings
 
-*Experimental (§13): this endpoint and its document may change after 1.0.*
-
 A vendor can choose to manage some capture settings in the collector instead of in code. A producer reads them only when the vendor turned that on (`VendorConfig(settings="console")` in `baton-sdk`, `{ settings: "console" }` in `baton-ts`, `Config{Settings: baton.SettingsConsole}` in the Go SDK). Otherwise it never calls this endpoint and uses the values in the vendor's code. The settings change what Baton records and what Baton adds to the tool list. They never change what the vendor's server does.
 
 **The request.** `GET /v0/settings?server=<vendor_id>`, with the same `Authorization` bearer the producer sends events with (§2.3) and its `tenant_id` in the `X-Baton-Tenant-Id` header. A producer sends the last `ETag` it received as `If-None-Match`.
@@ -932,20 +930,20 @@ Five rules, each of them a mistake this project has already made or nearly made:
 
 **It goes in its own envelope field, never inside `runtime_meta`.** That dict is the client's `_meta` forwarded verbatim (§11.4.1); a header is not `_meta`, and `info` may come from the handshake.
 
-**`labels` — the vendor's names for the caller's groups (OPTIONAL list of strings; experimental, §13).** The vendor's resolver returns them beside the principal or organization: `beta`, `enterprise`, or one unguessable key per customer that the vendor keeps (`org_7f3k9q2`). A `label` rule matches on them (§2.6). **Absent or `null` when there are none**, and never an empty list.
+**`labels` — the vendor's names for the caller's groups (OPTIONAL list of strings).** The vendor's resolver returns them beside the principal or organization: `beta`, `enterprise`, or one unguessable key per customer that the vendor keeps (`org_7f3k9q2`). A `label` rule matches on them (§2.6). **Absent or `null` when there are none**, and never an empty list.
 
 - A producer sends every usable label, in the order the resolver gave them, without repeats, and at most 20. A label is usable when it is a string of at most 64 Unicode code points, is not empty after removing Unicode `White_Space`, is well-formed Unicode and holds no U+0000. An unusable label is dropped alone.
 - Labels are sent as given, without the scrubber (§7): the vendor chose them as names it is happy for Baton to see.
 - **They are not identity.** A consumer MUST NOT read them as a principal or use them for authorization.
 - **Which events carry them.** Every event that carries `principal` or `organization` can carry them, including when the resolver returned labels alone.
 
-**`capture` — which collector settings the call ran under (OPTIONAL object; experimental, §13).** Present only when the producer applied a settings document (§2.6). Absent when the vendor manages settings in code, and before the first document is read. Members, each omitted when it has no value:
+**`capture` — which collector settings the call ran under (OPTIONAL object).** Present only when the producer applied a settings document (§2.6). Absent when the vendor manages settings in code, and before the first document is read. Members, each omitted when it has no value:
 
 | member | holds |
 |---|---|
 | `settings_version` | the document's `version` |
 | `audience` | the `id` of the audience that matched this caller |
-| `overlay` | reserved for the hash of the overlay a call saw; no producer sends it yet |
+| `overlay` | reserved for the hash of the overlay a call saw; no producer sends it yet (experimental, §13) |
 
 A consumer MUST NOT trust `settings_version` as proof a document was saved: any key holder can send any value. A consumer ignores a member it does not know.
 
@@ -1543,8 +1541,7 @@ From 1.0, the wire format is additive-only: no event type, field or value is rem
 
 | Experimental (may change after 1.0) | Where |
 |---|---|
-| `labels` and `capture`, including `capture.overlay` | §11.4 |
-| `GET /v0/settings` and its document | §2.6 |
+| `capture.overlay` | §11.4 |
 | `client_report` | §11.4.7 |
 | `trace_context` (reserved, not sent) | §5.2 |
 
@@ -1555,6 +1552,8 @@ From 1.0, the wire format is additive-only: no event type, field or value is rem
 ### Changes since 1.0
 
 A reference here to a §13 entry by date or version, such as "§13, 0.8.22", names an entry in the git history of `baton`'s `docs/SPEC.md`, where the changes up to 1.0 are.
+
+- **Settings are stable.** `GET /v0/settings` and its document (§2.6), `labels` and `capture` (§11.4) leave the experimental table. `capture.overlay` stays experimental.
 
 ---
 
