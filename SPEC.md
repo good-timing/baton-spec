@@ -1019,12 +1019,29 @@ Mirrors baton-proxy's `MessageProcessor._capture_surface` / `Emitter.enqueue_sur
   "seam_augmentations": {
     "injected_tools": ["acme_annotate"],
     "intent_param": {"names": ["user_goal"], "required_names": ["user_goal"], "mode": "required"},
-    "instructions_suffix": true
+    "instructions_suffix": true,
+    "agent_text": {                                     // experimental (§13)
+      "instructions.report_pointer": {"text": "Use `acme_annotate` to report ...", "source": "default"},
+      "report_tool.description": {"text": "Report an Acme tool call that went wrong ...", "source": "default"}
+    }
   }
 }
 ```
 
 **`seam_augmentations.intent_param` has one shape in `baton-sdk`, `baton-ts`, `baton-proxy` and `baton-extmcp`** (plural `names: list[str]`). All four inject one param, `user_goal`: `baton-sdk` from the single-field change (§13, 0.8.22), `baton-ts` from 0.5.8, `baton-proxy` from 0.6.19 and `baton-extmcp` from 0.2.1. Older `baton-ts` and `baton-proxy` releases inject three (`user_goal` + `expected_result` + `overall_task`), so a consumer reads `names` as data. `required_names` is sent from `baton-sdk` 0.8.12, `baton-ts` 0.5.3, `baton-proxy` 0.6.18 and `baton-extmcp` 0.2.1. An older release sends none, so a consumer reads a missing `required_names` as unknown, never as empty. `baton-extmcp` before 0.2.1 injected two params (`user_goal` + `expected_result`) and recorded them as `seam_augmentations.injected`, not `intent_param`. The top-level fields have the same shape across the four, and so do `injected_tools` and `instructions_suffix`, but their values follow each producer's settings. With reports off, the default from `baton-sdk` 0.8.23, `baton-ts` 0.5.8 and `baton-proxy` 0.6.19, `injected_tools` is `[]`, and `baton-extmcp` always sends `[]`. `instructions_suffix` is `false` when Baton's text is gone from the served instructions: under `report_mode="off"` that text is only the subagent sentence, which a tool declaring its own `user_goal` removes (§5.1.2). A library snapshot from `baton-sdk` 0.8.23 sends `instructions_suffix` null, meaning unknown, because the vendor serves the instructions itself. `baton-extmcp` sends null until a handshake response has passed through it, because the gateway's config decides whether it sees `initialize` at all. A consumer reads null as unknown, never as false.
+
+**`seam_augmentations.agent_text` is the text Baton itself showed the agent** (experimental, §13). It is an object keyed by these ids, one per piece of text:
+
+| id | the text |
+|---|---|
+| `instructions.subagent` | the sentence asking the agent to pass the message number to a subagent (§5.1.2) |
+| `instructions.report_pointer` | the sentence in the instructions that points to the report tool |
+| `goal_param.description` | the description of the injected `user_goal` param, with its `REQUIRED.` or `OPTIONAL.` |
+| `report_tool.description` | the report tool's description |
+| `report_tool.fields.<name>` | a report tool field's own description, for a field that has one |
+| `report_tool.refusal` | what the report tool answers a call it refuses (§5.1.1) |
+
+Each value is `{"text": "...", "source": "default" | "appended" | "replaced"}`: `text` is the text exactly as served, with the server's name filled in, and `source` says whether it is Baton's (`default`), Baton's with the vendor's text after it (`appended`), or the vendor's alone (`replaced`). A value is null when the producer cannot know the text. An id is absent when that text was not served: no report tool, no `report_tool.*`; no pointer sentence, no `instructions.report_pointer`. A library snapshot sends `instructions.*` as null, because the vendor serves the instructions itself. Like the rest of the payload, `agent_text` carries the code's values, not a caller's (§5.6 rule 7): a consumer that applies Console settings per caller works out each caller's text from them. A consumer MUST ignore an id it does not know, and reads a missing `agent_text` as unknown.
 
 **Capture mechanism differs by adapter** (both converge on the same wire shape):
 - `baton.integrations.standalone` (standalone `fastmcp` library) has a real `on_list_tools` middleware hook — the snapshot is captured and (if new) emitted on every `tools/list` response, using the vendor-true tools `call_next` returns before this adapter's own injection loop runs.
@@ -1415,7 +1432,8 @@ A producer sends these when a client asks for the server's tools (`tools/list`).
 | `payload.duration_ms` | timing | — |
 | `payload.result` in the `tool_call_end` and `tool_call_error.returned` vectors | each library hands the producer a different object for the same return | its shape |
 | `payload.error_type` in the `tool_call_error` vector (raised) | an exception class name is per language | a non-empty string |
-| `surface_snapshot` `payload.surface_hash`, `server_info`, `capabilities`, `tools` | each library derives a tool's schema its own way | `seam_augmentations` must match |
+| `surface_snapshot` `payload.surface_hash`, `server_info`, `capabilities`, `tools` | each library derives a tool's schema its own way | `seam_augmentations` must match, except `agent_text` |
+| `surface_snapshot` `payload.seam_augmentations.agent_text` | producers add it one at a time; the vector omits it until all send it | each value is `{text, source}` or null |
 
 `error_type` in the `tool_call_error.returned` vector is `"tool_error"` from every producer and is not exempt. `tool_call_start.identified.json` pins `call_intent`, `intent_source`, `principal` and `organization`: a vendor resolver returns a person with a company, and the call carries `user_goal`.
 
@@ -1542,6 +1560,7 @@ From 1.0, the wire format is additive-only: no event type, field or value is rem
 | Experimental (may change after 1.0) | Where |
 |---|---|
 | `capture.overlay` | §11.4 |
+| `surface_snapshot` `seam_augmentations.agent_text` | §11.4.2 |
 | `client_report` | §11.4.7 |
 | `trace_context` (reserved, not sent) | §5.2 |
 
@@ -1553,6 +1572,7 @@ From 1.0, the wire format is additive-only: no event type, field or value is rem
 
 A reference here to a §13 entry by date or version, such as "§13, 0.8.22", names an entry in the git history of `baton`'s `docs/SPEC.md`, where the changes up to 1.0 are.
 
+- **`seam_augmentations.agent_text`** (experimental): the text Baton showed the agent, per piece, with whether the vendor changed it (§11.4.2). The vector omits it until every producer sends it (§11.4.6).
 - **Settings are stable.** `GET /v0/settings` and its document (§2.6), `labels` and `capture` (§11.4) leave the experimental table. `capture.overlay` stays experimental.
 
 ---
