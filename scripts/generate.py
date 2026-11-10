@@ -178,11 +178,12 @@ def write_vectors() -> None:
         identified = _read_jsonl(identified_path)
     # Pinned together so the two scenarios never share a pinned id.
     _pin_volatile(events + identified)
-    # SPEC §11.4.6: agent_text stays out of the vectors until every producer sends it.
+    # SPEC §11.4.6: these stay out of the vectors until every producer sends them.
     for event in events + identified:
         seams = (event.get("payload") or {}).get("seam_augmentations")
         if isinstance(seams, dict):
             seams.pop("agent_text", None)
+            seams.pop("server_overlay", None)
 
     vectors_dir = ROOT / "vectors"
     vectors_dir.mkdir(exist_ok=True)

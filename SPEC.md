@@ -162,6 +162,7 @@ Each event records which settings it ran under in `capture` (§11.4).
 - An audience's `overlay` applies to the callers that audience matches, from their next `tools/list`.
 - `server_overlay` applies to every caller. It is the only place an action on the instructions can go, because the instructions are sent at `initialize`, before the producer knows the caller. It reaches new connections only: a session keeps the instructions it was given.
 - Each action has a `target` and one change. A producer applies the actions in order.
+- `"append"` adds its text after the existing text, as a new paragraph. `"replace"` sets the whole text.
 
 | target | change | where |
 |---|---|---|
@@ -171,7 +172,8 @@ Each event records which settings it ran under in `capture` (§11.4).
 | `{"agent_text": id}` | `"append"` or `"replace"` that piece of Baton's text (§11.4.2) | `instructions.*` in `server_overlay`; `goal_param.description` and `report_tool.*` in an audience's overlay |
 
 - `"required": true` is shown to the agent only. A producer never rejects a call that leaves the param out.
-- A hidden tool is hidden from `tools/call` too: a call to it gets the answer an unknown tool gets.
+- A hidden tool is hidden from `tools/call` too: a call to it gets the answer an unknown tool gets. Its `tool_call_error` carries `failure_kind: "tool_hidden"` (§11.4.3).
+- The report tool is not a `{"tool": n}` target: `reports` decides whether a caller sees it, and its text is changed with `agent_text` targets. An action on it is skipped.
 - A producer skips an action it cannot apply and warns once: an unknown target or change, a tool or param that does not exist, a required param to hide, or a target outside its place in the table. It applies the rest. An overlay never fails a `tools/list` or a call.
 - `capture.overlay` (§11.4) records the audience's overlay. `seam_augmentations.server_overlay` (§11.4.2) records the server's.
 
@@ -1152,6 +1154,7 @@ shapes, and a producer MUST emit `tool_call_error` for both:
 |---|---|---|
 | `unknown_tool` | the handler never ran — no tool by that name | **stays** |
 | `tool_disabled` | the handler never ran — the tool exists and is off | **stays** |
+| `tool_hidden` | the handler never ran — the caller's overlay hides the tool (§2.6) | **stays** — it is the host's unknown-tool message |
 | `invalid_argument` | the handler never ran — arguments rejected | **stays**, scrubbed: it can echo argument values |
 | `output_schema_mismatch` | the handler RETURNED and the server's check of its output rejected it | **goes** — the message describes what the tool returned |
 | `refused` | the handler never ran — code above it refused the call, such as a server subclass's own `call_tool` checking auth or credits, or the producer cannot tell why | **goes** — the message is the vendor's own code speaking |
@@ -1477,8 +1480,9 @@ A producer sends these when a client asks for the server's tools (`tools/list`).
 | `payload.duration_ms` | timing | — |
 | `payload.result` in the `tool_call_end` and `tool_call_error.returned` vectors | each library hands the producer a different object for the same return | its shape |
 | `payload.error_type` in the `tool_call_error` vector (raised) | an exception class name is per language | a non-empty string |
-| `surface_snapshot` `payload.surface_hash`, `server_info`, `capabilities`, `tools` | each library derives a tool's schema its own way | `seam_augmentations` must match, except `agent_text` |
+| `surface_snapshot` `payload.surface_hash`, `server_info`, `capabilities`, `tools` | each library derives a tool's schema its own way | `seam_augmentations` must match, except `agent_text` and `server_overlay` |
 | `surface_snapshot` `payload.seam_augmentations.agent_text` | producers add it one at a time; the vector omits it until all send it | each value is `{text, source}` or null |
+| `surface_snapshot` `payload.seam_augmentations.server_overlay` | producers add it one at a time; the vector omits it until all send it | a string or null |
 
 `error_type` in the `tool_call_error.returned` vector is `"tool_error"` from every producer and is not exempt. `tool_call_start.identified.json` pins `call_intent`, `intent_source`, `principal` and `organization`: a vendor resolver returns a person with a company, and the call carries `user_goal`.
 
@@ -1619,6 +1623,7 @@ From 1.0, the wire format is additive-only: no event type, field or value is rem
 A reference here to a §13 entry by date or version, such as "§13, 0.8.22", names an entry in the git history of `baton`'s `docs/SPEC.md`, where the changes up to 1.0 are.
 
 - **Overlays** (experimental): the settings document can hold overlays, per audience and for the whole server (§2.6). `capture.overlay` is now the overlay's id, not a hash. `seam_augmentations.server_overlay` records the server's (§11.4.2).
+- **`failure_kind: "tool_hidden"`**: a call to a tool the caller's overlay hides (§11.4.3, §2.6). `"append"` adds a new paragraph, and the report tool is not a tool target (§2.6).
 - **`seam_augmentations.agent_text`** (experimental): the text Baton showed the agent, per piece, with whether the vendor changed it (§11.4.2). The vector omits it until every producer sends it (§11.4.6).
 - **Settings are stable.** `GET /v0/settings` and its document (§2.6), `labels` and `capture` (§11.4) leave the experimental table. `capture.overlay` stays experimental.
 
