@@ -1,6 +1,6 @@
 {
   "about": "What each SDK's speed and load runner measures. A runner installs Baton through its MCP install path with default settings and an HTTP sink with default settings, sending to collector/fake_collector.py, started with --no-events, in the measure's 'collector' mode ('down': a port nobody listens on). The server has a tool 'echo', which returns its 'text' argument, and a tool 'large', which takes no arguments and returns a text of the measure's 'result_bytes' bytes: 'hello ' repeated and cut to that length. A client in the same process, over the SDK's in-process transport, calls echo with text 'hello' and nothing else, except in 'large_result', where it calls large. Each measure starts its own collector, server, client and install, and ends by closing the install handle and stopping the collector. 'concurrency' is how many calls are in flight at once on that one client; 'warmup' calls run first and are not counted. Times are wall-clock per call, from the client's call to its answer. The runner writes one JSON file per run, shaped as 'result' says. scripts/compare_bench.py reads a set of these files and prints a table.",
-  "bar": "The numbers compare two versions of one SDK on one machine. They are not what a vendor sees in production: the collector is local and the client is in the same process. The exception is a measure's 'limits': over 'repeats' runs of that measure alone, each named metric's median must be under its limit. scripts/check_bench_limit.py runs and checks them.",
+  "bar": "The numbers compare two versions of one SDK on one machine. They are not what a vendor sees in production: the collector is local and the client is in the same process. The exception is a measure's 'limits': over 'repeats' runs of that measure alone, each named metric's median must be under its limit. scripts/check_bench_limit.py runs and checks them. A measure's 'noise_floor' gives, per metric and SDK, the change between runs of one version that is still noise.",
   "repeats": 5,
   "measures": [
     {
@@ -27,7 +27,7 @@
       "about": "The collector takes every request and never answers. Calls must not slow down, and close must keep its budget.",
       "collector": "hang",
       "warmup": 0,
-      "calls": 2000,
+      "calls": 10000,
       "concurrency": 10,
       "metrics": ["wall_ms", "call_p50_ms", "call_p99_ms", "close_ms", "emitted", "delivered", "lost"]
     },
@@ -36,7 +36,7 @@
       "about": "Nothing listens at the collector's address, so every connection is refused.",
       "collector": "down",
       "warmup": 0,
-      "calls": 2000,
+      "calls": 10000,
       "concurrency": 10,
       "metrics": ["wall_ms", "call_p50_ms", "call_p99_ms", "close_ms", "emitted", "delivered", "lost"]
     },
@@ -47,7 +47,8 @@
       "warmup": 200,
       "calls": 20000,
       "concurrency": 1,
-      "metrics": ["heap_after_warmup_bytes", "heap_at_half_bytes", "heap_at_end_bytes", "growth_per_call_bytes"]
+      "metrics": ["heap_after_warmup_bytes", "heap_at_half_bytes", "heap_at_end_bytes", "growth_per_call_bytes"],
+      "noise_floor": {"growth_per_call_bytes": {"python": 20, "typescript": 100, "go": 20}}
     },
     {
       "name": "memory_outage",
@@ -56,7 +57,8 @@
       "warmup": 200,
       "calls": 20000,
       "concurrency": 1,
-      "metrics": ["heap_after_warmup_bytes", "heap_at_half_bytes", "heap_at_end_bytes", "growth_per_call_bytes"]
+      "metrics": ["heap_after_warmup_bytes", "heap_at_half_bytes", "heap_at_end_bytes", "growth_per_call_bytes"],
+      "noise_floor": {"growth_per_call_bytes": {"python": 20, "typescript": 100, "go": 20}}
     },
     {
       "name": "large_result",
