@@ -1,6 +1,6 @@
 """A collector that fails on purpose, for each SDK's collector tests and speed runs.
 
-    python fake_collector.py --mode MODE [--delay-ms N]
+    python fake_collector.py --mode MODE [--delay-ms N] [--no-events]
 
 Prints the port it listens on as the first line of stdout. ``POST
 /v0/events`` and ``POST /v0/events/batch`` (SPEC §2.5) with a bearer key
@@ -11,7 +11,9 @@ resent event once, by event_id or else sequence number), how many requests it
 got, and how many ``client_report`` events it accepted after an event, which
 are kept apart from the events. With ``?accepted=N&reports=M&wait_ms=T`` it
 first waits up to T ms until it has that many of each. ``?lists=0`` leaves
-out the sequence numbers and the events. ``refuse_first`` refuses the first
+out the sequence numbers and the events. ``--no-events`` keeps no event bodies,
+so that Python's garbage collector does not pause a long run; ``events`` is
+then left out. ``refuse_first`` refuses the first
 event and accepts the rest. ``no_batch`` is a collector without the batch
 endpoint. ``split`` answers 413 to a batch of more than 2 events, and ``413``
 to every request. ``429`` asks for a 1 s wait with ``Retry-After``. Standard
@@ -36,13 +38,13 @@ BATCH_CAP = 100
 class _Collector(ThreadingHTTPServer):
     daemon_threads = True
 
-    def __init__(self, mode: str, delay_ms: int) -> None:
+    def __init__(self, mode: str, delay_ms: int, keep_events: bool) -> None:
         super().__init__(("127.0.0.1", 0), _Handler)
         self.mode = mode
         self.delay = delay_ms / 1000
         self.accepted: set[int] = set()
         self.event_ids: set[object] = set()
-        self.events: list[dict[str, object]] = []
+        self.events: list[dict[str, object]] | None = [] if keep_events else None
         self.counts: Counter[str] = Counter()
         self.requests = 0
         self.reports = 0
@@ -76,7 +78,8 @@ class _Handler(BaseHTTPRequestHandler):
             }
             if query.get("lists", 1):
                 body["accepted"] = sorted(self.server.accepted)
-                body["events"] = self.server.events
+                if self.server.events is not None:
+                    body["events"] = self.server.events
         self._answer(200, json.dumps(body).encode())
 
     def do_POST(self) -> None:
@@ -153,7 +156,8 @@ class _Handler(BaseHTTPRequestHandler):
         if event_id is not None or sequence not in server.accepted:
             server.counts[str(event.get("event_type"))] += 1
         server.accepted.add(sequence)
-        server.events.append(event)
+        if server.events is not None:
+            server.events.append(event)
         return "accepted"
 
     def _answer(self, status: int, body: bytes = b"", headers: dict[str, str] | None = None) -> None:
@@ -172,8 +176,9 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", choices=MODES, required=True)
     parser.add_argument("--delay-ms", type=int, default=0)
+    parser.add_argument("--no-events", action="store_true")
     args = parser.parse_args()
-    server = _Collector(args.mode, args.delay_ms)
+    server = _Collector(args.mode, args.delay_ms, keep_events=not args.no_events)
     print(server.server_address[1], flush=True)
     server.serve_forever()
 

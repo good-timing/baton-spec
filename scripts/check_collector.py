@@ -207,9 +207,9 @@ def _known_words() -> bool:
     return ok
 
 
-def _with_collector(mode: str, check: Callable[[int, str], bool]) -> bool:
+def _with_collector(mode: str, check: Callable[[int, str], bool], *flags: str) -> bool:
     process = subprocess.Popen(
-        [sys.executable, str(ROOT / "fake_collector.py"), "--mode", mode, "--delay-ms", str(DELAY_MS)],
+        [sys.executable, str(ROOT / "fake_collector.py"), "--mode", mode, "--delay-ms", str(DELAY_MS), *flags],
         stdout=subprocess.PIPE,
         text=True,
     )
@@ -261,6 +261,23 @@ def _single_answers(port: int, mode: str) -> bool:
     return ok and extra_ok
 
 
+def _keeps_no_events(port: int, mode: str) -> bool:
+    """With --no-events, a batch and a resend are counted as without it, and
+    'events' is left out."""
+    got = _post_batch(port, _batch_of(20, 21))
+    resent = _post_batch(port, _batch_of(21))
+    received, _ = _received(port)
+    ok = (got, resent, received["counts"], received["accepted"], "events" in received) == (
+        (200, ["accepted"] * 2),
+        (200, ["duplicate"]),
+        {"tool_call_start": 2},
+        [20, 21],
+        False,
+    )
+    print(f"{'ok  ' if ok else 'FAIL'} {mode} --no-events: {got} then {resent}, received {received}")
+    return ok
+
+
 def main() -> int:
     failed = not _known_words()
     if set(EXPECTED) != set(MODES) or set(BATCH) != set(MODES):
@@ -269,6 +286,7 @@ def main() -> int:
     for mode in EXPECTED:
         failed |= not _with_collector(mode, _batch_answers)
         failed |= not _with_collector(mode, _single_answers)
+    failed |= not _with_collector("ok", _keeps_no_events, "--no-events")
     return 1 if failed else 0
 
 
