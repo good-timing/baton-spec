@@ -1,5 +1,5 @@
 {
-  "about": "What each SDK's speed and load runner measures. A runner installs Baton through its MCP install path with default settings and an HTTP sink with default settings, sending to collector/fake_collector.py, started with --no-events, in the measure's 'collector' mode ('down': a port nobody listens on). The server has a tool 'echo', which returns its 'text' argument, and a tool 'large', which takes no arguments and returns a text of the measure's 'result_bytes' bytes: 'hello ' repeated and cut to that length. A client in the same process, over the SDK's in-process transport, calls echo with text 'hello' and nothing else, except in 'large_result', where it calls large. Each measure starts its own collector, server, client and install, and ends by closing the install handle and stopping the collector. 'concurrency' is how many calls are in flight at once on that one client; 'warmup' calls run first and are not counted. Times are wall-clock per call, from the client's call to its answer. The runner writes one JSON file per run, shaped as 'result' says. scripts/compare_bench.py reads a set of these files and prints a table.",
+  "about": "What each SDK's speed and load runner measures. A runner installs Baton through its MCP install path with default settings and an HTTP sink with default settings, sending to collector/fake_collector.py, started with --no-events, in the measure's 'collector' mode ('down': a port nobody listens on). The server has a tool 'echo', which returns its 'text' argument, and a tool 'large', which takes no arguments and returns a text of the measure's 'result_bytes' bytes: 'hello ' repeated and cut to that length. A client in the same process, over the SDK's in-process transport, calls echo with text 'hello' and nothing else, except in 'large_result', where it calls large. Each measure starts its own collector. Each server it runs gets a new client, and an install unless it is the server without Baton. Each install handle is closed after its server's calls, and the measure ends by stopping the collector. 'concurrency' is how many calls are in flight at once on each client; 'warmup' calls run first and are not timed. Times are wall-clock per call, from the client's call to its answer. The runner writes one JSON file per run, shaped as 'result' says. scripts/compare_bench.py reads a set of these files and prints a table.",
   "bar": "The numbers compare two versions of one SDK on one machine. They are not what a vendor sees in production: the collector is local and the client is in the same process. The exception is a measure's 'limits': over 'repeats' runs of that measure alone, each named metric's median must be under its limit. scripts/check_bench_limit.py runs and checks them. A measure's 'noise_floor' gives, per metric and SDK, the change between runs of one version that is still noise.",
   "repeats": 5,
   "measures": [
@@ -15,30 +15,30 @@
     },
     {
       "name": "burst",
-      "about": "10,000 calls as fast as the client can make them. 'emitted' is 2 per call, its tool_call_start and tool_call_end. 'delivered' is how many of those the collector accepted once close returned; 'lost' is the rest.",
+      "about": "10,000 calls as fast as the client can make them. The same calls run first on a server without Baton: 'plain_*' are its figures, and 'added_*' the Baton figure less the plain one. A full garbage collection runs before each of the two. 'emitted' is 2 per call, its tool_call_start and tool_call_end, warmup calls included. 'delivered' is how many of those the collector accepted once close returned; 'lost' is the rest.",
       "collector": "ok",
-      "warmup": 0,
+      "warmup": 200,
       "calls": 10000,
       "concurrency": 10,
-      "metrics": ["wall_ms", "call_p50_ms", "call_p99_ms", "close_ms", "emitted", "delivered", "lost"]
+      "metrics": ["plain_wall_ms", "plain_call_p50_ms", "plain_call_p99_ms", "wall_ms", "call_p50_ms", "call_p99_ms", "added_call_p50_ms", "added_call_p99_ms", "close_ms", "emitted", "delivered", "lost"]
     },
     {
       "name": "outage_hang",
-      "about": "The collector takes every request and never answers. Calls must not slow down, and close must keep its budget.",
+      "about": "As 'burst', with the collector taking every request and never answering. Calls must not slow down, and close must keep its budget.",
       "collector": "hang",
-      "warmup": 0,
+      "warmup": 200,
       "calls": 10000,
       "concurrency": 10,
-      "metrics": ["wall_ms", "call_p50_ms", "call_p99_ms", "close_ms", "emitted", "delivered", "lost"]
+      "metrics": ["plain_wall_ms", "plain_call_p50_ms", "plain_call_p99_ms", "wall_ms", "call_p50_ms", "call_p99_ms", "added_call_p50_ms", "added_call_p99_ms", "close_ms", "emitted", "delivered", "lost"]
     },
     {
       "name": "outage_down",
-      "about": "Nothing listens at the collector's address, so every connection is refused.",
+      "about": "As 'burst', with nothing listening at the collector's address, so every connection is refused.",
       "collector": "down",
-      "warmup": 0,
+      "warmup": 200,
       "calls": 10000,
       "concurrency": 10,
-      "metrics": ["wall_ms", "call_p50_ms", "call_p99_ms", "close_ms", "emitted", "delivered", "lost"]
+      "metrics": ["plain_wall_ms", "plain_call_p50_ms", "plain_call_p99_ms", "wall_ms", "call_p50_ms", "call_p99_ms", "added_call_p50_ms", "added_call_p99_ms", "close_ms", "emitted", "delivered", "lost"]
     },
     {
       "name": "memory",
