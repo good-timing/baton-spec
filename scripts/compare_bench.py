@@ -9,14 +9,17 @@ range over its runs, and the change between the medians: a percentage, or
 the difference where the old range reaches zero or the metric has a
 'noise_floor'. A change whose new median lies inside the old group's range,
 or that is smaller than the metric's noise floor for the SDK, is marked as
-noise. It decides nothing: it exits non-zero only when a file does not have
-the shape bench.json gives, or bench.json's noise floors are malformed.
+noise. A published version before a measure's 'since' lacks it; that
+shows as a dash. It decides nothing: it exits non-zero only when a file does not
+have the shape bench.json gives, some runs of one version have a measure and
+others lack it, or bench.json's noise floors are malformed.
 Standard library only.
 """
 
 from __future__ import annotations
 
 import json
+import re
 import statistics
 import sys
 from collections import Counter
@@ -26,6 +29,30 @@ from typing import Any
 BENCH = json.loads((Path(__file__).resolve().parent.parent / "bench" / "bench.json").read_text())
 METRICS = {m["name"]: m["metrics"] for m in BENCH["measures"]}
 SDKS = {"python", "typescript", "go"}
+SINCE: dict[str, dict[str, str]] = {m["name"]: m.get("since", {}) for m in BENCH["measures"]}
+
+
+def release(version: str) -> tuple[int, ...]:
+    """The release numbers of any SDK's version: v1.2.0, 1.2.0-beta.1 and 1.2.0rc1 are (1, 2, 0)."""
+    found = re.match(r"v?(\d+(?:\.\d+)*)", version)
+    if found is None:
+        raise ValueError(f"not a version: {version!r}")
+    return tuple(int(part) for part in found.group(1).split("."))
+
+
+def _runs(measure: str, sdk: object) -> bool:
+    return not SINCE[measure] or sdk in SINCE[measure]
+
+
+def _may_lack(measure: str, run: dict[str, Any]) -> bool:
+    """A published version older than the measure's 'since' for its SDK."""
+    since = SINCE[measure].get(str(run.get("sdk")))
+    if run.get("source") != "published" or since is None:
+        return False
+    try:
+        return release(str(run.get("version"))) < release(since)
+    except ValueError:
+        return False
 KEYS = set(BENCH["result"]) - {"cpu"}
 
 
@@ -62,10 +89,34 @@ def _shape_errors(name: str, run: dict[str, Any]) -> list[str]:
     if extra := set(measures) - set(METRICS):
         errors.append(f"{name}: has measures bench.json lacks: {sorted(extra)}")
     for measure, metrics in METRICS.items():
-        got = measures.get(measure, {})
+        runs = _runs(measure, run.get("sdk"))
+        if measure not in measures:
+            if runs and not _may_lack(measure, run):
+                errors.append(f"{name}: lacks {measure}")
+            continue
+        if not runs:
+            errors.append(f"{name}: has {measure}, which bench.json runs for {sorted(SINCE[measure])} only")
+        got = measures[measure]
         if set(got) != set(metrics) or not all(isinstance(v, (int, float)) for v in got.values()):
             errors.append(f"{name}: {measure} has {sorted(got)}, bench.json has {sorted(metrics)}, all numbers")
     return errors
+
+
+def _groups(runs: list[dict[str, Any]]) -> dict[tuple[str, str], list[dict[str, Any]]]:
+    groups: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for run in sorted(runs, key=lambda r: r["source"] != "published"):
+        groups.setdefault((run["version"], run["source"]), []).append(run)
+    return groups
+
+
+def _partial_errors(groups: dict[tuple[str, str], list[dict[str, Any]]]) -> list[str]:
+    """A measure that some runs of one version have and others lack."""
+    return [
+        f"{version} {source}: {measure} is in {have} of {len(group)} runs"
+        for (version, source), group in groups.items()
+        for measure in METRICS
+        if 0 < (have := sum(measure in r["measures"] for r in group)) < len(group)
+    ]
 
 
 def _figure(value: float) -> str:
@@ -93,9 +144,7 @@ def cpus(group: list[dict[str, Any]]) -> str:
 
 
 def table(runs: list[dict[str, Any]]) -> str:
-    groups: dict[tuple[str, str], list[dict[str, Any]]] = {}
-    for run in sorted(runs, key=lambda r: r["source"] != "published"):
-        groups.setdefault((run["version"], run["source"]), []).append(run)
+    groups = _groups(runs)
     labels = [f"{version} {source}" for version, source in groups]
     pair = len(groups) == 2
     sdks = sorted({r["sdk"] for r in runs})
@@ -110,15 +159,18 @@ def table(runs: list[dict[str, Any]]) -> str:
         "| measure | metric | " + " | ".join(labels) + (" | change |" if pair else ""),
         "|---|---|" + "---|" * len(groups) + ("---|" if pair else ""),
     ]
-    rows = [(m, metric) for m, metrics in METRICS.items() for metric in metrics] + [("process", "max_rss_bytes")]
+    measured = [m for m in METRICS if any(m in r["measures"] for r in runs)]
+    rows = [(m, metric) for m in measured for metric in METRICS[m]] + [("process", "max_rss_bytes")]
     for measure, metric in rows:
         values = [
             [float(r["max_rss_bytes"] if measure == "process" else r["measures"][measure][metric]) for r in group]
+            if measure == "process" or measure in group[0]["measures"]
+            else []
             for group in groups.values()
         ]
         floor = FLOORS.get((measure, metric), {}).get(sdk)
-        change = f" {_change(*values, floor)} |" if pair else ""
-        lines.append(f"| {measure} | {metric} | " + " | ".join(cell(v) for v in values) + " |" + change)
+        change = (f" {_change(*values, floor)} |" if all(values) else " — |") if pair else ""
+        lines.append(f"| {measure} | {metric} | " + " | ".join(cell(v) if v else "—" for v in values) + " |" + change)
     return "\n".join(lines)
 
 
@@ -129,6 +181,8 @@ def main() -> int:
         run = json.loads(Path(name).read_text())
         errors += _shape_errors(name, run)
         runs.append(run)
+    if not errors:
+        errors += _partial_errors(_groups(runs))
     if errors or not runs:
         print("\n".join(errors) or "no result files given", file=sys.stderr)
         return 1

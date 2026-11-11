@@ -1,6 +1,6 @@
 """A collector that fails on purpose, for each SDK's collector tests and speed runs.
 
-    python fake_collector.py --mode MODE [--delay-ms N] [--no-events]
+    python fake_collector.py --mode MODE [--delay-ms N] [--no-events] [--settings JSON]
 
 Prints the port it listens on as the first line of stdout. ``POST
 /v0/events`` and ``POST /v0/events/batch`` (SPEC §2.5) with a bearer key
@@ -17,7 +17,8 @@ then left out. ``refuse_first`` refuses the first
 event and accepts the rest. ``no_batch`` is a collector without the batch
 endpoint. ``split`` answers 413 to a batch of more than 2 events, and ``413``
 to every request. ``429`` asks for a 1 s wait with ``Retry-After``. Standard
-library only, so any SDK's CI can run it. Stop it by killing the process: a
+library only, so any SDK's CI can run it. With ``--settings``, ``GET
+/v0/settings`` (SPEC §2.6) answers that document whatever the mode. Stop it by killing the process: a
 ``hang`` request never ends on its own.
 """
 
@@ -38,7 +39,7 @@ BATCH_CAP = 100
 class _Collector(ThreadingHTTPServer):
     daemon_threads = True
 
-    def __init__(self, mode: str, delay_ms: int, keep_events: bool) -> None:
+    def __init__(self, mode: str, delay_ms: int, keep_events: bool, settings: bytes | None) -> None:
         super().__init__(("127.0.0.1", 0), _Handler)
         self.mode = mode
         self.delay = delay_ms / 1000
@@ -48,6 +49,7 @@ class _Collector(ThreadingHTTPServer):
         self.counts: Counter[str] = Counter()
         self.requests = 0
         self.reports = 0
+        self.settings = settings
         self.refused_first = False
         self.changed = threading.Condition()
 
@@ -57,6 +59,9 @@ class _Handler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:
         url = urlsplit(self.path)
+        if url.path == "/v0/settings" and self.server.settings is not None:
+            self._answer(200, self.server.settings, {"Content-Type": "application/json"})
+            return
         if url.path != "/_received":
             self._answer(404)
             return
@@ -177,8 +182,10 @@ def main() -> None:
     parser.add_argument("--mode", choices=MODES, required=True)
     parser.add_argument("--delay-ms", type=int, default=0)
     parser.add_argument("--no-events", action="store_true")
+    parser.add_argument("--settings", help="the document GET /v0/settings answers, as JSON")
     args = parser.parse_args()
-    server = _Collector(args.mode, args.delay_ms, keep_events=not args.no_events)
+    settings = json.dumps(json.loads(args.settings)).encode() if args.settings is not None else None
+    server = _Collector(args.mode, args.delay_ms, keep_events=not args.no_events, settings=settings)
     print(server.server_address[1], flush=True)
     server.serve_forever()
 

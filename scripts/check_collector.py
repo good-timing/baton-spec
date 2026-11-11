@@ -278,6 +278,36 @@ def _keeps_no_events(port: int, mode: str) -> bool:
     return ok
 
 
+SETTINGS = {"version": 1, "audiences": [{"id": "everyone", "match": {}, "capture": {}}]}
+
+
+def _settings(port: int) -> tuple[int, object]:
+    connection = http.client.HTTPConnection("127.0.0.1", port, timeout=3)
+    try:
+        connection.request("GET", "/v0/settings?server=v")
+        response = connection.getresponse()
+        body = response.read()
+    finally:
+        connection.close()
+    return response.status, json.loads(body) if response.status == 200 else None
+
+
+def _serves_settings(port: int, mode: str) -> bool:
+    """With --settings, GET /v0/settings answers the document in any mode."""
+    got = _settings(port)
+    ok = got == (200, SETTINGS)
+    print(f"{'ok  ' if ok else 'FAIL'} {mode} --settings: {got[0]}")
+    return ok
+
+
+def _no_settings(port: int, mode: str) -> bool:
+    """Without --settings, GET /v0/settings is a 404, as the SDKs' collector tests expect."""
+    got = _settings(port)[0]
+    ok = got == 404
+    print(f"{'ok  ' if ok else 'FAIL'} {mode} without --settings: {got}")
+    return ok and _keeps_no_events(port, mode)
+
+
 def main() -> int:
     failed = not _known_words()
     if set(EXPECTED) != set(MODES) or set(BATCH) != set(MODES):
@@ -286,7 +316,8 @@ def main() -> int:
     for mode in EXPECTED:
         failed |= not _with_collector(mode, _batch_answers)
         failed |= not _with_collector(mode, _single_answers)
-    failed |= not _with_collector("ok", _keeps_no_events, "--no-events")
+    failed |= not _with_collector("ok", _no_settings, "--no-events")
+    failed |= not _with_collector("hang", _serves_settings, "--settings", json.dumps(SETTINGS))
     return 1 if failed else 0
 
 

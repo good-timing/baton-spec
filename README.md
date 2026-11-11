@@ -44,8 +44,9 @@ producer owns this repo; it's the neutral thing they all agree with.
   retired names land in the intent members, not in `params`.
 - `bench/bench.json` and `scripts/compare_bench.py` — what each SDK's speed
   and load runner measures against the same collector: the time Baton adds
-  to a call, a burst of 10,000 calls, the collector hung or down, and memory
-  growth over 20,000 calls with the collector healthy and hung. The
+  to a call, a burst of 10,000 calls, the collector hung or down, memory
+  growth over 20,000 calls with the collector healthy and hung, and, for
+  Python, the time `serve()` adds when the vendor answers MCP itself. The
   compare script prints the last release and the new code side by side.
   It reports; it decides nothing. `scripts/check_bench_limit.py` is what
   decides: it fails unless each of a measure's `limits` holds.

@@ -1,5 +1,5 @@
 {
-  "about": "What each SDK's speed and load runner measures. A runner installs Baton through its MCP install path with default settings and an HTTP sink with default settings, sending to collector/fake_collector.py, started with --no-events, in the measure's 'collector' mode ('down': a port nobody listens on). The server has a tool 'echo', which returns its 'text' argument, and a tool 'large', which takes no arguments and returns a text of the measure's 'result_bytes' bytes: 'hello ' repeated and cut to that length. A client in the same process, over the SDK's in-process transport, calls echo with text 'hello' and nothing else, except in 'large_result', where it calls large. Each measure starts its own collector. Each server it runs gets a new client, and an install unless it is the server without Baton. Each install handle is closed after its server's calls, and the measure ends by stopping the collector. 'concurrency' is how many calls are in flight at once on each client; 'warmup' calls run first and are not timed. Times are wall-clock per call, from the client's call to its answer. The runner writes one JSON file per run, shaped as 'result' says. scripts/compare_bench.py reads a set of these files and prints a table.",
+  "about": "What each SDK's speed and load runner measures. A measure with 'since' is run only by the SDKs it names, from the version given for each. Unless a measure's 'about' says otherwise, a runner installs Baton through its MCP install path with default settings and an HTTP sink with default settings, sending to collector/fake_collector.py, started with --no-events, in the measure's 'collector' mode ('down': a port nobody listens on). The server has a tool 'echo', which returns its 'text' argument, and a tool 'large', which takes no arguments and returns a text of the measure's 'result_bytes' bytes: 'hello ' repeated and cut to that length. A client in the same process, over the SDK's in-process transport, calls echo with text 'hello' and nothing else, except in 'large_result', where it calls large. Each measure starts its own collector. Each server it runs gets a new client, and an install unless it is the server without Baton. Each install handle is closed after its server's calls, and the measure ends by stopping the collector. 'concurrency' is how many calls are in flight at once on each client; 'warmup' calls run first and are not timed. Times are wall-clock per call, from the client's call to its answer. The runner writes one JSON file per run, shaped as 'result' says. scripts/compare_bench.py reads a set of these files and prints a table.",
   "bar": "The numbers compare two versions of one SDK on one machine. They are not what a vendor sees in production: the collector is local and the client is in the same process. The exception is a measure's 'limits': over 'repeats' runs of that measure alone, each named metric's median must be under its limit. scripts/check_bench_limit.py runs and checks them. A measure's 'noise_floor' gives, per metric and SDK, the change between runs of one version that is still noise.",
   "repeats": 5,
   "measures": [
@@ -69,6 +69,23 @@
       "concurrency": 1,
       "result_bytes": 51200,
       "metrics": ["plain_p50_ms", "plain_p99_ms", "baton_p50_ms", "baton_p99_ms", "added_p50_ms", "added_p99_ms", "heap_growth_bytes", "emitted", "delivered", "lost"]
+    },
+    {
+      "name": "serve_overhead",
+      "about": "As 'overhead', for a vendor whose own code answers MCP and passes each message through the SDK's serve. The vendor's dispatch function answers a tools/call of echo with its 'text' argument. The collector also serves this measure's 'settings' from GET /v0/settings. The same message, a tools/call of echo with arguments 'text' 'hello' and 'user_goal' '1: say hello', goes first to the dispatch alone, then through serve on a client made with the DSN http://k@127.0.0.1:<port>/ten_0123abcd/v, Console settings, the tool list [echo] given up front, and its default sink. The caller is principal 'u1' of organization 'o1' with label 'starter', so it is matched against 'enterprise' first and lands in 'everyone'. The plain calls run before the client is made. The runner then sends a tools/list through serve as that caller until echo's schema no longer requires user_goal ('everyone' makes it optional), and only then warms up and times. Calls run one at a time. Python times its blocking Client.",
+      "since": {"python": "1.2.0"},
+      "collector": "ok",
+      "settings": {
+        "version": 1,
+        "audiences": [
+          {"id": "enterprise", "match": {"label": ["enterprise"]}, "capture": {"results": "off"}},
+          {"id": "everyone", "match": {}, "capture": {"goal": "optional", "reports": "on"}}
+        ]
+      },
+      "warmup": 200,
+      "calls": 2000,
+      "concurrency": 1,
+      "metrics": ["plain_p50_ms", "plain_p99_ms", "baton_p50_ms", "baton_p99_ms", "added_p50_ms", "added_p99_ms"]
     }
   ],
   "result": {
@@ -78,6 +95,6 @@
     "runtime": "the language runtime and its version",
     "cpu": "the CPU model as the OS names it (on Linux, the first 'model name' in /proc/cpuinfo), else 'unknown'; shared CI machines differ in speed. Optional: kept results may lack it",
     "max_rss_bytes": "the process's peak resident memory once the measures before 'memory' have run, since Python's heap reading itself takes memory; at exit when no memory measure ran",
-    "measures": "an object with a member per measure run, each an object with a number per metric. A run of one measure alone has that member only"
+    "measures": "an object with a member per measure run, each an object with a number per metric. A run of one measure alone has that member only, and a version before a measure's 'since' leaves it out"
   }
 }
