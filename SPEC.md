@@ -1626,7 +1626,7 @@ A reference here to a §13 entry by date or version, such as "§13, 0.8.22", nam
 - **`failure_kind: "tool_hidden"`**: a call to a tool the caller's overlay hides (§11.4.3, §2.6). `"append"` adds a new paragraph, and the report tool is not a tool target (§2.6).
 - **`seam_augmentations.agent_text`** (experimental): the text Baton showed the agent, per piece, with whether the vendor changed it (§11.4.2). The vector omits it until every producer sends it (§11.4.6).
 - **Settings are stable.** `GET /v0/settings` and its document (§2.6), `labels` and `capture` (§11.4) leave the experimental table. `capture.overlay` stays experimental.
-- **`share` samples principals only.** A caller with an organization and no principal no longer matches `share` by the organization's id (§11.4.2).
+- **`share` samples principals only.** A caller with an organization and no principal no longer matches `share` by the organization's id (§2.6).
 
 ---
 
