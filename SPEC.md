@@ -185,6 +185,23 @@ Each event records which settings it ran under in `capture` (§11.4).
 - A `surface_snapshot` describes the server, not a caller (§5.6 rule 7), so its `seam_augmentations` carry the code's values.
 - In `baton-sdk`, `report_mode` is `"on"` by default under `settings="console"`. A vendor who sets `report_mode="off"` gets no report tool, so `reports` can only take it away from some callers.
 
+**Test changes** (experimental). A test change is a settings document the collector stores under an id, for a test run to try before anyone approves it. Only a test key may fetch one. The collector decides which keys are test keys; a producer never decides it from the key string.
+
+- **The request.** `GET /v0/settings?server=<vendor_id>&candidate=<id>`, with the same headers as the request above and no `If-None-Match`.
+
+| Answer | Producer |
+|---|---|
+| `200` with a document whose `candidate` member is `<id>` | serves the change. A document naming another id, or an invalid one, counts as a failed read |
+| `403` `{"error": "not_a_test_key"}` | warns once and fetches no change again for the life of the process |
+| `404` `{"error": "unknown_candidate"}` | holds the id as unknown |
+| anything else, a network error, or a timeout | the read failed. A later request may try again |
+
+- **Which change a request gets.** A request's `Baton-Candidate: <id>` header, on HTTP, wins over `BATON_CANDIDATE=<id>` in the environment, which wins over none. An id is 1 to 128 of `A-Z`, `a-z`, `0-9`, `_` and `-`; a producer ignores any other value. Both are read only under Console settings.
+- **A change id never changes.** The collector pins the approved document under it when it stores the change, so a producer reads each id once and never refreshes it. It holds at most 32 ids, unknown ones included, and drops the oldest first.
+- **The variable** is read when the SDK is installed or created, before the first `initialize`, waiting up to 5 seconds, so the change reaches the instructions on stdio too. A producer never refuses to start over it: without the collector's answer it cannot tell a test start from a production start. On a timeout, a `404`, a failed read or settings that are not Console settings it logs an error.
+- **The header** is read in the background the first time its id is seen, at most 4 at once. Until the change is held, the request gets today's settings, even when the variable names another change. A runner lists tools until the change's text shows before it starts a test. Clients list tools once per connection, so a runner keeps one change per connection. The server instructions go out once per connection and are the same for every caller, so a header's change never changes them: a change to `server_overlay` is tested with the variable.
+- **Anything that is not a held change gets today's settings**, and its events carry no `capture.candidate`. Events served under a change carry `capture.candidate` (§11.4), which a collector trusts only on a test key's events.
+
 ---
 
 ## 3. Inbound: Signal payload
@@ -1001,6 +1018,7 @@ Five rules, each of them a mistake this project has already made or nearly made:
 | `settings_version` | the document's `version` |
 | `audience` | the `id` of the audience that matched this caller |
 | `overlay` | the id of the audience's overlay this call was served (§2.6), if any (experimental, §13) |
+| `candidate` | the id of the test change this call was served (§2.6), if any (experimental, §13) |
 
 A consumer MUST NOT trust `settings_version` as proof a document was saved: any key holder can send any value. A consumer ignores a member it does not know.
 
@@ -1622,6 +1640,7 @@ From 1.0, the wire format is additive-only: no event type, field or value is rem
 | Experimental (may change after 1.0) | Where |
 |---|---|
 | `capture.overlay` | §11.4 |
+| test changes and `capture.candidate` | §2.6, §11.4 |
 | `surface_snapshot` `seam_augmentations.agent_text` | §11.4.2 |
 | overlays in the settings document, and `seam_augmentations.server_overlay` | §2.6, §11.4.2 |
 | `client_report` | §11.4.7 |
@@ -1644,6 +1663,7 @@ A reference here to a §13 entry by date or version, such as "§13, 0.8.22", nam
 - **A library trace withholds a raised message under `"off"`** (§11.4.3). Text passed to `observed()` is still kept.
 - **No `user_goal` on a schema that could refuse it** (§5.1.2), on every path.
 - **A vendor tool with the annotation tool's name wins** (§5.1.1).
+- **Test changes** (experimental): a test key fetches a settings document by id, chosen by the `Baton-Candidate` header or `BATON_CANDIDATE`, and events served under one carry `capture.candidate` (§2.6, §11.4).
 
 ---
 

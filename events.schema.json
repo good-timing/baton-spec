@@ -323,6 +323,18 @@
           ],
           "default": null,
           "title": "Overlay"
+        },
+        "candidate": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Candidate"
         }
       },
       "title": "CaptureObserved",
