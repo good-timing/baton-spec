@@ -335,6 +335,18 @@
           ],
           "default": null,
           "title": "Candidate"
+        },
+        "task": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task"
         }
       },
       "title": "CaptureObserved",
