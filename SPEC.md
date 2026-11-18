@@ -173,6 +173,7 @@ Each event records which settings it ran under in `capture` (§11.4).
 
 - `"required": true` is shown to the agent only. A producer never rejects a call that leaves the param out.
 - A hidden tool is hidden from `tools/call` too: a call to it gets the answer an unknown tool gets. Its `tool_call_error` carries `failure_kind: "tool_hidden"` (§11.4.3).
+- Where the vendor answers `tools/call` with its own code, as on a low-level server or `serve()` (§5.6), the producer cannot ask that code for its unknown-tool answer. It answers a hidden tool with its MCP SDK's unknown-tool answer instead. If the vendor answers an unknown tool with other text, an agent can tell a hidden tool from a missing one. A vendor who needs the two to match answers an unknown tool the way its MCP SDK does.
 - The report tool is not a `{"tool": n}` target: `reports` decides whether a caller sees it, and its text is changed with `agent_text` targets. An action on it is skipped.
 - A producer skips an action it cannot apply and warns once: an unknown target or change, a tool or param that does not exist, a required param to hide, or a target outside its place in the table. It applies the rest. An overlay never fails a `tools/list` or a call.
 - `capture.overlay` (§11.4) records the audience's overlay. `seam_augmentations.server_overlay` (§11.4.2) records the server's.
@@ -1665,6 +1666,7 @@ A reference here to a §13 entry by date or version, such as "§13, 0.8.22", nam
 - **A library trace withholds a raised message under `"off"`** (§11.4.3). Text passed to `observed()` is still kept.
 - **No `user_goal` on a schema that could refuse it** (§5.1.2), on every path.
 - **A vendor tool with the annotation tool's name wins** (§5.1.1).
+- **A hidden tool may differ from a missing one** where the vendor answers `tools/call` with its own code (§2.6).
 - **Test changes** (experimental): a test key fetches a settings document by id, chosen by the `Baton-Candidate` header or `BATON_CANDIDATE`, and events served under one carry `capture.candidate` (§2.6, §11.4).
 - **`capture.task`** (experimental): the test run's task id, from `Baton-Task` or `BATON_TASK`, on events served under a test change (§2.6, §11.4).
 
