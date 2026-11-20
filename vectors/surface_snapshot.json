@@ -19,7 +19,7 @@
   "runtime_meta": null,
   "event_type": "surface_snapshot",
   "payload": {
-    "surface_hash": "sha256:281c4f1bcef54a45ab241c9e45647d61b56f3f5c1a54a8f462880fb0addd5b87",
+    "surface_hash": "sha256:5ea3f41ecdaa080f20865c1c30157c8bb271d1625eea6faba3c8608f2c577c66",
     "server_info": {
       "name": "spec-vector-generator",
       "version": ""
@@ -50,6 +50,19 @@
           "properties": {},
           "title": "boomArguments",
           "type": "object"
+        },
+        "outputSchema": {
+          "properties": {
+            "result": {
+              "title": "Result",
+              "type": "null"
+            }
+          },
+          "required": [
+            "result"
+          ],
+          "title": "boomOutput",
+          "type": "object"
         }
       },
       {
@@ -66,6 +79,11 @@
             "name"
           ],
           "title": "lookupArguments",
+          "type": "object"
+        },
+        "outputSchema": {
+          "additionalProperties": true,
+          "title": "lookupDictOutput",
           "type": "object"
         }
       },
