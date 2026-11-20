@@ -1085,6 +1085,8 @@ The SDK does NOT interpret `runtime_meta` beyond capture; on the MCP path it rem
 
 Mirrors baton-proxy's `MessageProcessor._capture_surface` / `Emitter.enqueue_surface_snapshot`. The SDK snapshots the wrapped server's **vendor-true** surface — `server_info` / `capabilities` / `instructions` (captured once, at `install_baton(...)` time, BEFORE Baton mutates instructions) plus the full `tools` list with schemas (captured BEFORE Baton's `user_goal` injection) — hashes it (canonical JSON, sorted keys), and emits `surface_snapshot` once per observed `surface_hash` per install, among the last 256 hashes it sent. A repeated capture of an unchanged surface is not re-emitted; a hash that has dropped out of those 256 is sent again, and a repeated `surface_hash` is the same surface. A library producer snapshots the tool list its vendor passes to `client.list_tools(...)`, once per hash per client among the last 256 it sent, with no `transport_observed`, `principal` or `client_observed` (§5.6 rule 7). In the Go SDK, `server_info` is the `*mcp.Implementation` and `instructions` the `ServerOptions.Instructions` the vendor passes to `Install` or `New`. `capabilities` come from the first `initialize` or `server/discover` answer the SDK sees, before it adds to it; until one is seen they are null, and a second snapshot carries them.
 
+**When an adapter captures.** An adapter MAY capture when it serves `tools/list`, from the tools the vendor's own answer to that request lists, before the producer changes it, and send the snapshot before that request's `tool_list_end` (§11.4.5). A server whose own answer differs by caller then has one surface per list it serves. An adapter that captures at listing still captures at a tool call where its server has a complete registry, for a client that never lists. A list served in more than one page MAY get no snapshot at listing.
+
 `surface_hash` is the identity change specs and recipes are authored against (proxy's own `base_surface_hash`). This is why the snapshot excludes anything Baton itself adds: Baton's own injected tool (the annotation tool) is omitted from `tools` and recorded instead in `payload.seam_augmentations.injected_tools`, and the schema-injected `user_goal` param never appears in `tools[].inputSchema` — toggling `intent_param_mode` MUST NOT change `surface_hash`.
 
 ```json
@@ -1482,7 +1484,7 @@ A producer sends these when a client asks for the server's tools (`tools/list`).
 | `event_type` | Payload |
 |---|---|
 | `tool_list_start` | `{}` |
-| `tool_list_end` | `{count, duration_ms?}` |
+| `tool_list_end` | `{count, duration_ms?, surface_hash?}` |
 | `tool_list_error` | `{error_type, error_body, duration_ms?}` |
 
 **The shapes are §11.4.4's list shapes**, and its rules for `error_type`, `error_body`, pairing and `result_capture` apply here unchanged. Vendor code can run inside a `tools/list` request, as a handler, an override or middleware, so `tool_list_error` can carry the vendor's text. Measured on both `baton-sdk` adapters and both `baton-ts` majors, and pinned by a test in each, under a withholding mode. These three are specified apart from the twelve only because they were designed here and not recorded from a producer.
@@ -1495,7 +1497,9 @@ A producer sends these when a client asks for the server's tools (`tools/list`).
 
 **`count` is the length of the `tools` array in that one response.** It includes any tool the producer itself added to the list. It counts one page, not the server's surface: `surface_snapshot` (§11.4.2) describes the surface.
 
-**No payload carries the list.** A producer MUST NOT put tool names, descriptions or schemas on these events.
+**`surface_hash` is the hash of the `surface_snapshot` that describes this response** (§11.4.2), sent before it. A producer MAY send it, and absent and null are the same. The producer's own additions are outside it, as in every `surface_hash`. A consumer ties a session's later calls to the latest `surface_hash` listed in that session, because a snapshot's own `session_id` need not be that session's.
+
+**No payload carries the list.** A producer MUST NOT put tool names, descriptions or schemas on these events. `surface_hash` names a snapshot and is not the list.
 
 **Session id.** A listing carries the session id any other request from that client would carry (§3.4). Where a producer can only give each request a session id of its own, each listing arrives as a session of its own.
 
@@ -1670,6 +1674,7 @@ A reference here to a §13 entry by date or version, such as "§13, 0.8.22", nam
 - **Test changes** (experimental): a test key fetches a settings document by id, chosen by the `Baton-Candidate` header or `BATON_CANDIDATE`, and events served under one carry `capture.candidate` (§2.6, §11.4).
 - **`capture.task`** (experimental): the test run's task id, from `Baton-Task` or `BATON_TASK`, on events served under a test change (§2.6, §11.4).
 - **`baton-proxy` reads Console settings and withholds results** from 0.9.0, under `--console-settings` (§2.6). Its events then carry `result_capture` (§11.4, §11.4.3).
+- **`tool_list_end` carries `surface_hash`**, and an adapter may snapshot at `tools/list` from the list it served (§11.4.2, §11.4.5).
 
 ---
 

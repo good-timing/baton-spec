@@ -4275,7 +4275,7 @@
     },
     "ToolListEndPayload": {
       "additionalProperties": false,
-      "description": "Emitted after ``tools/list`` returns. ``count`` is the length of the\n``tools`` array in that one response, the producer's own tools included.",
+      "description": "Emitted after ``tools/list`` returns. ``count`` is the length of the\n``tools`` array in that one response, the producer's own tools included.\n``surface_hash`` is that of the ``surface_snapshot`` describing this\nresponse, when the producer captured one.",
       "properties": {
         "count": {
           "title": "Count",
@@ -4292,6 +4292,18 @@
           ],
           "default": null,
           "title": "Duration Ms"
+        },
+        "surface_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Surface Hash"
         }
       },
       "required": [
