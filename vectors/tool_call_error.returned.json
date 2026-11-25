@@ -38,6 +38,7 @@
       "result_type": "complete"
     },
     "result_capture": null,
+    "result_size_bytes": null,
     "failure_kind": null
   }
 }

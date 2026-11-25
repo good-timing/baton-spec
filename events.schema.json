@@ -3604,6 +3604,18 @@
           ],
           "default": null,
           "title": "Result Capture"
+        },
+        "result_size_bytes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Result Size Bytes"
         }
       },
       "required": [
@@ -3833,6 +3845,18 @@
           ],
           "default": null,
           "title": "Result Capture"
+        },
+        "result_size_bytes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Result Size Bytes"
         },
         "failure_kind": {
           "anyOf": [

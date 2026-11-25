@@ -29,6 +29,7 @@
       }
     ],
     "duration_ms": 0,
-    "result_capture": null
+    "result_capture": null,
+    "result_size_bytes": null
   }
 }
